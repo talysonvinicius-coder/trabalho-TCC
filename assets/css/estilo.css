@@ -35,9 +35,6 @@ td {
   transition: background-color 0.3s ease;
 }
 
-tbody > tr:nth-child(2n) td {
-  background-color: rgba(255, 255, 255, 0.2);
-}
 
 td:hover {
   background-color: rgba(255, 255, 255, 0.4);
@@ -47,7 +44,7 @@ td:hover {
 button {
   margin-top: 10px;
   padding: 10px 20px;
-  background-color: #ff0066;
+  background-color:  #384861;
   color: #fff;
   border: none;
   border-radius: 8px;

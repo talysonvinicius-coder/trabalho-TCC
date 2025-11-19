@@ -29,7 +29,7 @@
 
 .register-form{
   margin: 0 auto;
-  background-color: #C8A03B;
+  background-color: #294C60;
   padding: 25px;
   border-radius: 15px;
 }

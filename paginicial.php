@@ -23,6 +23,7 @@
         td, th {
             border: 1px solid black;
             padding: 20px;
+            background-color: #294C60;
         }
         thead, tfoot {
             background-color: gray;
@@ -52,11 +53,15 @@
 
         }
         
-        tbody > tr:nth-child(2n) {
-            background-color: chocolate;
-
-        }
-
+       input {
+  font-size: large;
+  color: #fff;
+  padding: 15px 15px;
+  background-color: #001B2E;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
     </style>
     
@@ -91,5 +96,7 @@
         <link rel="stylesheet" href="paginicial.php">
     </tbody>
  </table>
+
+ <a href="./musica.php"><input type="button" value="Voltar para Login" ></a> 
 </body>
 </html>
