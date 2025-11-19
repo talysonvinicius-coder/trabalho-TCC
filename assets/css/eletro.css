@@ -1,10 +1,12 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-image: url('../img/jazz.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
+ background-image: url('../img/soundscore.png');
   background-color: #FFEFD3;
+  background-size: contain; 
+  background-repeat: no-repeat;      /* cobre toda a tela */
+  background-position: center; 
+  width: 100vw;
+  height: 100vh;
   color: #fff;
   margin: 0;
   padding: 0;
@@ -27,7 +29,7 @@ body {
   border: none;
 }
 
-.musica h2{
+.musica h2 {
   margin: 10px 0 10px 0;
 }
 
@@ -61,11 +63,12 @@ body {
 
 .musica select {
   font-size: medium;
-    padding: 9px 10px;
-    margin: 10px 100px;
-    border-radius: 8px;
-    width: 50%;
+  padding: 9px 10px;
+  margin: 10px 100px;
+  border-radius: 8px;
+  width: 50%;
 }
+
 input {
   font-size: large;
   color: #fff;
@@ -74,31 +77,4 @@ input {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-}
-
-.star-rating{
-  margin: 0 auto;
-  display: inline-flex;
-  flex-direction: row-reverse;
-  align-content: space-between;
-}
-
-.star-rating label{
-  font-size: xx-large;
-  padding: 0 15px;
-  cursor: pointer;
-}
-
-.star-rating input{
-  position:fixed;
-  opacity:0;
-  left:-90000px;
-}
-
-.star-rating input:focus + label {
- outline: 2px dotted black;
-}
-
-.star-rating input:checked ~ label {
-  color: gold;
 }

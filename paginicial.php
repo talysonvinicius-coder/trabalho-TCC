@@ -9,6 +9,10 @@
     <style>
           body {
             font-family: Arial, Helvetica, sans-serif;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
         }
         table {
             width: 700px;
@@ -49,40 +53,43 @@
         }
         
         tbody > tr:nth-child(2n) {
-            background-color: #0a468300;
+            background-color: chocolate;
 
         }
+
 
     </style>
     
 </head>
 <body>
+    <?php 
+        include("./partials/navbar.php");
+    ?>
     <h1>Escolha o que avaliar hoje!!</h1>
  <table>
     <tbody>
         <tr>
         <label><td>Hip-Hop</td> 
-            <td><a href="hiphop.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+            <td><a href="hiphop.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
         <td>Jazz</td>
-         <td><a href="Jazz.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+         <td><a href="Jazz.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
         </tr>
         <tr>
         <td>POP</td>
-         <td><a href="POP.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+         <td><a href="POP.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
         <td>Música Eletrônica</td>
-         <td><a href="musicaeletro.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+         <td><a href="musicaeletro.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
         </tr>
         <tr>
             <td>Rock</td>
-             <td><a href="rock.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+             <td><a href="rock.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
             <td>MPB</td>
-             <td><a href="mpb.html"><button id="visualizarmusicas">Visualizar Músicas</button></td>
+             <td><a href="mpb.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
         </tr>
          
     
-        <link rel="stylesheet" href="paginicial.html">
+        <link rel="stylesheet" href="paginicial.php">
     </tbody>
  </table>
- <p><a href="musica.html">Voltar para Página inicial</a></p>
 </body>
 </html>

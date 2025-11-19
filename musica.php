@@ -19,8 +19,8 @@
 <br>
 <input type="text"placeholder="Nome"></br></br>
 <input type="password"placeholder="Senha" required></br></br>
-    <a href="paginicial.html"><input type="button" value="Entrar"></input>
-<p> Não tem conta?<a href="cadastro.html">Registre-se </a></p>
+    <a href="paginicial.php"><input type="button" value="Entrar"></input>
+<p> Não tem conta?<a href="cadastro.php">Registre-se </a></p>
 </fieldset>
 </form>
 </div>

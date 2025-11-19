@@ -1,13 +1,13 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-     background-image: url('../img/Copilot_20251116_001125.png');
+     background-image: url('../img/rock.png');
     background-size: cover;
     /* cobre toda a tela */
     background-position: center;
     /* centraliza a imagem */
     color: #fff;
     margin: 0;
-    padding: 20px;
+    padding: 0;
     text-align: center;
     font-size: larger;
     font-weight: bold;
@@ -27,13 +27,13 @@ body {
     border: none;
 }
 
-.musica h2 {
-    margin: 0 0 20px 0;
+.musica h2{
+  margin: 10px 0 10px 0;
 }
 
 .register-form {
     margin: 0 auto;
-    background-color: #C8A03B;
+  background-color: #294C60;
     padding: 25px;
     border-radius: 15px;
 }
@@ -57,4 +57,48 @@ body {
     margin: 5px 0px;
     border-radius: 8px;
     border: none;
+}
+
+.musica select {
+  font-size: medium;
+    padding: 9px 10px;
+    margin: 10px 100px;
+    border-radius: 8px;
+    width: 50%;
+}
+input {
+  font-size: large;
+  color: #fff;
+  padding: 15px 15px;
+  background-color: #001B2E;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.star-rating{
+  margin: 0 auto;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-content: space-between;
+}
+
+.star-rating label{
+  font-size: xx-large;
+  padding: 0 15px;
+  cursor: pointer;
+}
+
+.star-rating input{
+  position:fixed;
+  opacity:0;
+  left:-90000px;
+}
+
+.star-rating input:focus + label {
+ outline: 2px dotted black;
+}
+
+.star-rating input:checked ~ label {
+  color: gold;
 }

@@ -3,7 +3,7 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('../img/Copilot_20251116_001125.png');
+  background-image: url('../img/soundscore.png');
   background-size: cover;
   background-position: center;
   color: #fff;
@@ -20,7 +20,7 @@ body {
 
 .login-form {
   margin: 0 auto;
-  background-color: #C8A03B;
+  background-color: #294C60;
   padding: 25px;
   border-radius: 15px;
   text-align: center;
@@ -28,11 +28,11 @@ body {
 
 .login-form a {
   text-decoration: none;
-  color: #333;
+  color: #fff;
 }
 
 .login-form a:hover {
-  color: #000;
+  color: #aaa;
 
 }
 
@@ -51,7 +51,7 @@ body {
   font-size: large;
   color: #fff;
   padding: 15px 15px;
-  background-color: #442e2e;
+  background-color: #001B2E;
   border: none;
   border-radius: 5px;
   cursor: pointer;

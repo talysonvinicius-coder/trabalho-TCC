@@ -4,43 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./assets/css/pop.css">
+    <link rel="stylesheet" href="./assets/css/jazz.css">
 </head>
 <body>
+    <?php 
+        include("./partials/navbar.php");
+    ?>
     <div class="container">
         <div class="register-form">
-                <fieldset>
-
+            <fieldset>
             <div class="musica">
-            <h2>Anitta-Girl from Rio</h2>
-        <input type="text"placeholder="0 a 5 estrelas">
+              <h2>  Easy to fall in Love-Olivia Dean </h2>
         <label for="imagem">Sua opnião sobre a música:</label>
     <textarea  name="" id="imagem"  placeholder="Exemplo:Música legal para utilizar em uma redção do ENEM como repertorio!"></textarea>
             </div>
             <div class="musica">
-
-         <h2>  Dua Lipa-Don't Start Now</h2>
-        <input type="text"placeholder="0 a 5 estrelas">
+              <h2>  Tom Jobim-Desafinado</h2>
         <label for="imagem">Sua opnião sobre a música:</label>
     <textarea  name="" id="imagem"  placeholder="Exemplo:Música legal para utilizar em uma redção do ENEM como repertorio!"></textarea>
             </div>
             <div class="musica">
-
-        <h2>   Luísa Sonza-Devagarinho </h2>
-        <input type="text"placeholder="0 a 5 estrelas">
+             <h2>   JFreek`n You-Jodeci</h2>
         <label for="imagem">Sua opnião sobre a música:</label>
     <textarea  name="" id="imagem"  placeholder="Exemplo:Música legal para utilizar em uma redção do ENEM como repertorio!"></textarea>
             </div>
             <div class="musica">
-
-        <h2> Ed Sheeran-Shape of You </h2>
-        <input type="text"placeholder="0 a 5 estrelas">
+             <h2>  Let`s get in on-Marvin Gaye </h2>
         <label for="imagem">Sua opnião sobre a música:</label>
     <textarea  name="" id="imagem"  placeholder="Exemplo:Música legal para utilizar em uma redção do ENEM como repertorio!"></textarea>
             </div>
-            </fieldset>
-            <p><a href="paginicial.html">Voltar para Página de seleção</a></p>
+            </fieldset> 
+            <a href="paginicial.php"> <input type="button" value="Voltar para página inicial"> 
+                <a href="teste.php"> <input type="button" value="Finalizar"> 
         </div>
-    </div>
+    </div>   
 </body>
 </html>

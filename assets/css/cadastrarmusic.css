@@ -3,7 +3,7 @@ body {
   padding: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('../img/Copilot_20251116_001125.png');
+  background-image: url('../img/soundscore.png');
   color: #fff;
   background-size: cover;
   background-position: center;
@@ -22,11 +22,13 @@ body {
 .container .title{
   font-size: x-large;
   margin: 0 auto;
+  color : #001B2E;
+
 }
 
 .register-form{
   margin: 0 auto;
-  background-color: #C8A03B;
+  background-color: #294C60;
   padding: 25px;
   border-radius: 15px;
 }
@@ -45,11 +47,13 @@ body {
   margin-bottom: 5px;
   border-radius: 8px;
   border: none;
+  background-color: #001B2E;
+  color: #fff;
 }
 
 .register-form button {
   padding: 15px;
-  background-color: #442e2e;
+  background-color: #001B2E;
   color: #fff;
   border: none;
   border-radius: 5px;

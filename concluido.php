@@ -7,6 +7,7 @@
 
     <style>
           body {
+            background-color: #FFEFD3;
             font-family: Arial, Helvetica, sans-serif;
         }
         table {
@@ -16,11 +17,11 @@
             position: relative;
         }
         td, th {
-            border: 1px solid #C8A03B;;
+            border: 1px solid #294C60;
             padding: 20px;
         }
         thead, tfoot {
-            background-color: #C8A03B;;
+            background-color: #001B2E;
             color: rgb(0, 0, 0);
         }
 
@@ -28,7 +29,8 @@
             /* No título da linha do cabeçalho vou grudar "sticky" */
             position: sticky; /* grudar */
             top: 0; /* na posição 0 */
-            background-color:#C8A03B;;
+            background-color: #001B2E;
+            color: #fff;
 
         }
         td.num {
@@ -48,7 +50,7 @@
         }
         
         tbody > tr:nth-child(2n) {
-            background-color: #C8A03B;;
+            background-color: #294C60;
 
         }
 
@@ -99,10 +101,10 @@
             </tbody>
 
           
-            <link rel="stylesheet"  href="concluido.html">
+            <link rel="stylesheet"  href="concluido.php">
 
 </table>
-<p><a href="musica.html">Voltar para página inicial</a></p>
+<p><a href="musica.php">Voltar para página inicial</a></p>
 
         
 

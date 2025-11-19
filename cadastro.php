@@ -7,6 +7,7 @@
     <title>cadastro</title>
 </head>
 <body>
+
     <div class="container">
         <div class="title">
             <h1>Vem avaliar com a gente!!</h1>
@@ -28,7 +29,7 @@
    <p> <label for="isenha">Crie uma senha:</label></br><input type="password" name="Digite sua senha" id="isenha" placeholder="Digite sua senha" minlength="5" 
     maxlength="15" required></p> 
 
- <a href="concluido.html"><input type="button" value="Enviar"></input>
+ <a href="concluido.php"><input type="button" value="Enviar"></input>
     
     
    </fieldset>
