@@ -17,9 +17,9 @@
     <h1>Olá!!</h1>
 </p>
 <br>
-<input type="text"placeholder="Nome"></br></br>
+<input type="text"placeholder="Nome" required></br></br>
 <input type="password"placeholder="Senha" required></br></br>
-    <a href="paginicial.php"><input type="button" value="Entrar"></input>
+ <button type="submit" class="btn btn-cadastrar">Entrar</button>
 <p> Não tem conta?<a href="cadastro.php">Registre-se </a></p>
 </fieldset>
 </form>

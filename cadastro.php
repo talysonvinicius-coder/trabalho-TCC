@@ -7,6 +7,13 @@
     <title>cadastro</title>
 </head>
 <body>
+     <fieldset>
+ <legend>Administração</legend>
+ <form action="controller/TestarConexaoControl.php"
+method="post">
+ <button type="submit">Testar Conexão com o Banco</button>
+ </form>
+ </fieldset>
 
     <div class="container">
         <div class="title">
@@ -14,13 +21,13 @@
         </div>
 
         <div class="register-form">
-            <form action="cadastro.php" method="post" autocomplete="on">    
+            <form action="./controller/CadastroUsuarioControl.php" method="post" autocomplete="on">    
         <a>
     <h2>Dados pessoais</h2>
    <p> <label for="inome">Nome:</br></label><input type="text" name="Nome Completo" id="inome" placeholder="Nome Completo" minlength="5" 
     maxlength="15" required></p> 
    <p> <label for="iemail">Email:</label></br><input type="text" name="seuemail" id="iemail" placeholder="seuemail@exemplo.com" minlength="5" 
-    maxlength="15" required></p> 
+    maxlength="50" required></p> 
    <p> <label for="itel">telefone(formato(xx)xxxx-xxxx):</label></br><input type="text" name="(12)2526-3577" id="itel" placeholder="(12)2526-3577" minlength="5" 
     maxlength="15" required></p> 
     <p> <label for="inome">Gênero musical favorito:</br></label><input type="text" name="Gênero" id="igenero" placeholder="ex:HipHop" minlength="5" 

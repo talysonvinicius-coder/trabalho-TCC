@@ -97,6 +97,6 @@
     </tbody>
  </table>
 
- <a href="./musica.php"><input type="button" value="Voltar para Login" ></a> 
+ <a href="./index.php"><input type="button" value="Voltar para Login" ></a> 
 </body>
 </html>
