@@ -7,9 +7,10 @@
     <title>Login</title>
 </head>
 <body>
+    
 <div class="container">
 <div class="login-form">
-    <form>
+    <form action="../trabalho-html/paginicial.php">
 
     
 

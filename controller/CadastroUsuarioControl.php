@@ -1,5 +1,8 @@
 <?php
 //Controller responsável por processar o cadastro de usuário
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once '../Model/dto/UsuarioDTO.php';
 require_once '../Model/dao/UsuarioDAO.php';
 // Verifica se o formulário foi enviado via POST
@@ -24,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
  if ($resultado) {
  echo "<script>
  alert('Usuário cadastrado com sucesso!');
- window.location.href = '../cadastro.php';
+ window.location.href = '../concluido.php';
  </script>";
  } else {
  echo "<script>

@@ -1,0 +1,132 @@
+-- ============================================
+-- Script SQL - Projeto LTP
+-- Sistema de Cadastro de Usuários
+-- Execute este script no phpMyAdmin ou MySQL Workbench
+-- ============================================
+
+-- Cria o banco de dados
+CREATE DATABASE IF NOT EXISTS bdmusica
+DEFAULT CHARACTER SET utf8mb4
+DEFAULT COLLATE utf8mb4_general_ci;
+
+-- Seleciona o banco de dados
+USE bdmusica;
+
+
+-- Remover tabelas (ordem respeitando FKs)
+DROP TABLE IF EXISTS denuncias;
+DROP TABLE IF EXISTS lista_musicas;
+DROP TABLE IF EXISTS listas;
+DROP TABLE IF EXISTS curtidas;
+DROP TABLE IF EXISTS comentarios;
+DROP TABLE IF EXISTS avaliacoes;
+DROP TABLE IF EXISTS seguidores;
+DROP TABLE IF EXISTS musicas;
+DROP TABLE IF EXISTS usuario;
+
+-- Tabela usuario
+CREATE TABLE usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(150) UNIQUE,
+    senha VARCHAR(255),
+    status TINYINT(1)   DEFAULT 1         COMMENT '1 = Ativo, 0 = Inativo',
+    bio TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela musicas
+CREATE TABLE musicas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(150),
+    artista VARCHAR(150),
+    album VARCHAR(150),
+    genero VARCHAR(100),
+    data_lancamento DATE
+);
+
+-- Tabela avaliacoes
+CREATE TABLE avaliacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    musica_id INT,
+    nota DECIMAL(2,1),
+    comentario TEXT,
+    data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+    FOREIGN KEY (musica_id) REFERENCES musicas(id)
+);
+
+-- Tabela comentarios
+CREATE TABLE comentarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    avaliacao_id INT,
+    conteudo TEXT,
+    data_comentario TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+    FOREIGN KEY (avaliacao_id) REFERENCES avaliacoes(id)
+);
+
+-- Tabela curtidas
+CREATE TABLE curtidas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    avaliacao_id INT,
+    comentario_id INT,
+    data_curtiu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+    FOREIGN KEY (avaliacao_id) REFERENCES avaliacoes(id),
+    FOREIGN KEY (comentario_id) REFERENCES comentarios(id)
+);
+
+-- Tabela seguidores
+CREATE TABLE seguidores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    seguidor_id INT,
+    seguido_id INT,
+    data_seguimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (seguidor_id) REFERENCES usuario(id),
+    FOREIGN KEY (seguido_id) REFERENCES usuario(id)
+);
+
+-- Tabela listas
+CREATE TABLE listas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    nome VARCHAR(150),
+    descricao TEXT,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+);
+
+-- Tabela lista_musicas
+CREATE TABLE lista_musicas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    lista_id INT,
+    musica_id INT,
+    FOREIGN KEY (lista_id) REFERENCES listas(id),
+    FOREIGN KEY (musica_id) REFERENCES musicas(id)
+);
+
+-- Tabela denuncias
+CREATE TABLE denuncias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT,
+    comentario_id INT,
+    motivo TEXT,
+    status VARCHAR(50) DEFAULT 'Pendente',
+    data_denuncia TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+    FOREIGN KEY (comentario_id) REFERENCES comentarios(id)
+);
+
+
+-- Insere dados de exemplo (Corrigido para 'usuario' e removido o 'FROM')
+INSERT INTO usuario (nome, email, senha, status) VALUES
+('João Silva',     'joao@email.com',  MD5('123456'), 1),
+('Maria Santos',   'maria@email.com', MD5('123456'), 1),
+('Pedro Oliveira', 'pedro@email.com', MD5('123456'), 1);
+
+-- Exibe os dados inseridos (Corrigido para 'usuario')
+SELECT * FROM usuario;

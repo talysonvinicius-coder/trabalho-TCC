@@ -20,28 +20,42 @@ method="post">
             <h1>Vem avaliar com a gente!!</h1>
         </div>
 
-        <div class="register-form">
-            <form action="./controller/CadastroUsuarioControl.php" method="post" autocomplete="on">    
-        <a>
-    <h2>Dados pessoais</h2>
-   <p> <label for="inome">Nome:</br></label><input type="text" name="Nome Completo" id="inome" placeholder="Nome Completo" minlength="5" 
-    maxlength="15" required></p> 
-   <p> <label for="iemail">Email:</label></br><input type="text" name="seuemail" id="iemail" placeholder="seuemail@exemplo.com" minlength="5" 
-    maxlength="50" required></p> 
-   <p> <label for="itel">telefone(formato(xx)xxxx-xxxx):</label></br><input type="text" name="(12)2526-3577" id="itel" placeholder="(12)2526-3577" minlength="5" 
-    maxlength="15" required></p> 
-    <p> <label for="inome">Gênero musical favorito:</br></label><input type="text" name="Gênero" id="igenero" placeholder="ex:HipHop" minlength="5" 
-    maxlength="15" required></p> 
+  <div class="register-form">
+    <form action="../trabalho-html/Controller/CadastroUsuarioControl.php" method="post" autocomplete="on">    
+        <h2>Dados pessoais</h2>
+        
+        <p> 
+            <label for="inome">Nome:<br></label>
+            <input type="text" name="nome" id="inome" placeholder="Nome Completo" minlength="5" maxlength="50" required>
+        </p> 
+        
+        <p> 
+            <label for="iemail">Email:</label><br>
+            <input type="email" name="email" id="iemail" placeholder="seuemail@exemplo.com" required>
+        </p> 
 
-   <p> <label for="isenha">Crie uma senha:</label></br><input type="password" name="Digite sua senha" id="isenha" placeholder="Digite sua senha" minlength="5" 
-    maxlength="15" required></p> 
+        <p> 
+            <label for="itel">Telefone:</label><br>
+            <input type="text" name="telefone" id="itel" placeholder="(12)2526-3577">
+        </p> 
 
- <a href="concluido.php"><input type="button" value="Enviar"></input>
-    
+        <p> 
+            <label for="igenero">Gênero musical favorito:<br></label>
+            <input type="text" name="genero" id="igenero" placeholder="ex: HipHop">
+        </p> 
+
+        <p> 
+            <label for="isenha">Crie uma senha:</label><br>
+            <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" minlength="5" required>
+        </p> 
+
+        <button type="submit">Cadastrar</button>
+    </form>
+</div>
     
    </fieldset>
     </form>
-        </div>
+        
     </div>   
     
 </body>
