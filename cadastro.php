@@ -7,13 +7,15 @@
     <title>cadastro</title>
 </head>
 <body>
-     <fieldset>
+<div class="register-fieldset">    
+<fieldset>
  <legend>Administração</legend>
  <form action="controller/TestarConexaoControl.php"
 method="post">
  <button type="submit">Testar Conexão com o Banco</button>
  </form>
  </fieldset>
+ </div> 
 
     <div class="container">
         <div class="title">

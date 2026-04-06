@@ -13,7 +13,7 @@ try {
     if ($conexao instanceof PDO) {
         echo "<div style='color: green; font-weight: bold; padding: 10px; border: 1px solid green; background-color: #e6fffa; border-radius: 5px; font-family: sans-serif;'>";
         echo "✅ Conexão estabelecida com sucesso!<br>";
-        echo "Base de dados: usuario";
+        echo "Base de dados: bdmusica";
         echo "</div>";
     } else {
         echo "<div style='color: red; font-weight: bold; padding: 10px; border: 1px solid red; background-color: #fff5f5; border-radius: 5px; font-family: sans-serif;'>";

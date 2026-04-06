@@ -37,9 +37,27 @@ body {
   margin: 0 0 20px 0;
 }
 
-.register-form fieldset{
+.register-fieldset{
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  font-size: large;
+ padding: 10px 20px;
+ margin-bottom: 5px;
+ border-radius: 8px;
  border: none;
+ background-color: #001B2E;
 }
+
+.register-fieldset button{
+  padding: 15px;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+ }
+ 
 
 .register-form input {
   font-size: medium;
