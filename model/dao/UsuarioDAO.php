@@ -21,7 +21,7 @@ class UsuarioDAO {
  }
 
  // Método para listar todos os usuários (ativos e inativos)
- public function listarUsuarios() {
+ public function listarUsuario() {
  try {
  $pdo = Conexao::getConexao();
  // Buscamos o status para que a View saiba se mostra o botão Ativar ou Desativar

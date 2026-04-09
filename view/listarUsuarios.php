@@ -3,7 +3,7 @@
 require_once '../Model/dao/UsuarioDAO.php';
 // Instancia o DAO e busca a lista de usuários
 $usuarioDAO = new UsuarioDAO();
-$usuarios = $usuarioDAO->listarUsuarios();
+$usuarios = $usuarioDAO->listarUsuario();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">

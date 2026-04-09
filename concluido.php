@@ -3,14 +3,14 @@
 require_once './model/dao/UsuarioDAO.php';
 // Instancia o DAO e busca a lista de usuários
 $usuarioDAO = new UsuarioDAO();
-$usuarios = $usuarioDAO->listarUsuarios();
+$usuario = $usuarioDAO->listarUsuario();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Listar Usuários</title>
-    <link rel="stylesheet" href="../assets/css/estilo.css">
+    <link rel="stylesheet" href="./assets/css/estilo.css">
 
     <style>
           body {
@@ -74,7 +74,7 @@ $usuarios = $usuarioDAO->listarUsuarios();
             <th>Status</th>
             <th>Ações</th>
         </tr>
-        <?php foreach ($usuarios as $usuario): ?>
+        <?php foreach ($usuario as $usuario): ?>
         <tr>
             <td><?php echo $usuario['id']; ?></td>
             <td><?php echo $usuario['nome']; ?></td>
@@ -83,27 +83,27 @@ $usuarios = $usuarioDAO->listarUsuarios();
             <td>
                 <div style="display: flex; gap: 10px;">
 
-                    <form action="../controller/EditarUsuarioControl.php" method="post">
+                    <form action="./controller/EditarUsuarioControl.php" method="post">
                         <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
                         <button type="submit">Editar</button>
                     </form>
 
                     <?php if (($usuario['status'] ?? 0) == 1): ?>
-                        <form action="../controller/StatusUsuarioControl.php" method="post" 
+                        <form action="./controller/StatusUsuarioControl.php" method="post" 
                               onsubmit="return confirm('Deseja realmente desativar este usuário?');">
                             <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
                             <input type="hidden" name="status" value="0">
                             <button type="submit" style="background-color: orange;">Desativar</button>
                         </form>
                     <?php else: ?>
-                        <form action="../controller/StatusUsuarioControl.php" method="post">
+                        <form action="./controller/StatusUsuarioControl.php" method="post">
                             <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
                             <input type="hidden" name="status" value="1">
                             <button type="submit" style="background-color: green; color: white;">Ativar</button>
                         </form>
                     <?php endif; ?>
 
-                    <form action="../controller/ExcluirUsuarioControl.php" method="post" 
+                    <form action="./controller/ExcluirUsuarioControl.php" method="post" 
                           onsubmit="return confirm('CUIDADO: Deseja apagar permanentemente?');">
                         <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
                         <button type="submit" style="color: red;">Excluir</button>

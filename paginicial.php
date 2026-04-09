@@ -1,102 +1,61 @@
+<?php
+// Array com os gêneros musicais
+$generos = [
+    ['nome' => 'Hip-Hop', 'classe' => 'hiphop', 'link' => 'hiphop.php'],
+    ['nome' => 'Jazz', 'classe' => 'jazz', 'link' => 'jazz.php'],
+    ['nome' => 'POP', 'classe' => 'pop', 'link' => 'pop.php'],
+    ['nome' => 'Música Eletrônica', 'classe' => 'eletronica', 'link' => 'musicaeletro.php'],
+    ['nome' => 'Rock', 'classe' => 'rock', 'link' => 'rock.php'],
+    ['nome' => 'MPB', 'classe' => 'mpb', 'link' => 'mpb.php'],
+    ['nome' => 'Sertanejo', 'classe' => 'sertanejo', 'link' => 'sertanejo.php'],
+    ['nome' => 'Funk', 'classe' => 'funk', 'link' => 'funk.php'],
+    ['nome' => 'Reggae', 'classe' => 'reggae', 'link' => 'reggae.php'],
+    ['nome' => 'Clássica', 'classe' => 'classica', 'link' => 'classica.php'],
+    ['nome' => 'Lo-fi', 'classe' => 'lofi', 'link' => 'lofi.php'],
+    ['nome' => 'Country', 'classe' => 'country', 'link' => 'country.php'],
+];
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-     <link rel="stylesheet" href="./assets/css/estilo.css">
-
-    <style>
-          body {
-            font-family: Arial, Helvetica, sans-serif;
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-        table {
-            width: 700px;
-            border-collapse: collapse ;
-            /* Obrigatório para ter o título da tabela fixo */
-            position: relative;
-        }
-        td, th {
-            border: 1px solid black;
-            padding: 20px;
-            background-color: #294C60;
-        }
-        thead, tfoot {
-            background-color: gray;
-            color: rgb(0, 0, 0);
-        }
-
-        thead > tr > th {
-            /* No título da linha do cabeçalho vou grudar "sticky" */
-            position: sticky; /* grudar */
-            top: 0; /* na posição 0 */
-            background-color: gray;
-
-        }
-        td.num {
-            text-align: right;
-        
-        }
-        caption {
-            /* Tamanho da fonte */
-            font-size: 1.5em;
-            /* Para colocar em negrito */
-            font-weight: bold;
-            /* Para deixar mais espaçado */
-            padding: 15px;
-            /* Colocar um fundo no meu caption */
-            background-color: lightgray;
-
-        }
-        
-       input {
-  font-size: large;
-  color: #fff;
-  padding: 15px 15px;
-  background-color: #001B2E;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-    </style>
-    
+    <title>SoundScore - Gêneros</title>
+  <link rel="stylesheet" href="./assets/css/paginicial.css">
 </head>
 <body>
-    <?php 
-        include("./partials/navbar.php");
-    ?>
-    <h1>Escolha o que avaliar hoje!!</h1>
- <table>
-    <tbody>
-        <tr>
-        <label><td>Hip-Hop</td> 
-            <td><a href="hiphop.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-        <td>Jazz</td>
-         <td><a href="Jazz.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-        </tr>
-        <tr>
-        <td>POP</td>
-         <td><a href="POP.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-        <td>Música Eletrônica</td>
-         <td><a href="musicaeletro.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-        </tr>
-        <tr>
-            <td>Rock</td>
-             <td><a href="rock.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-            <td>MPB</td>
-             <td><a href="mpb.php"><button id="visualizarmusicas">Visualizar Músicas</button></td>
-        </tr>
-         
-    
-        <link rel="stylesheet" href="paginicial.php">
-    </tbody>
- </table>
 
- <a href="./index.php"><input type="button" value="Voltar para Login" ></a> 
+    <header class="header">
+        <h1>SOUNDSCORE</h1>
+    </header>
+
+    <div class="grid-container">
+        <?php foreach ($generos as $g): ?>
+            <div class="card <?php echo $g['classe']; ?>">
+                <h2><?php echo $g['nome']; ?></h2>
+                <form action="<?php echo $g['link']; ?>" method="GET">
+                    <input type="hidden" name="genero" value="<?php echo $g['nome']; ?>">
+                    <button type="submit">Visualizar Músicas</button>
+                </form>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="footer-area">
+        <button class="btn-voltar" onclick="window.location.href='index.php'">Voltar para Login</button>
+    </div>
+
+    <div class="audio-visualizer">
+        <?php 
+        $cores_barra = ['#7b4fb6', '#00d4ff', '#9b59b6', '#e74c3c', '#f1c40f', '#2ecc71'];
+        for ($i = 0; $i < 60; $i++) {
+            $altura = rand(10, 45); 
+            $cor = $cores_barra[$i % count($cores_barra)];
+            echo "<div class='bar' style='height: {$altura}px; background: {$cor};'></div>";
+        }
+        ?>
+    </div>
+
 </body>
 </html>

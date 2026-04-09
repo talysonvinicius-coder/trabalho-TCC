@@ -25,7 +25,7 @@ if (isset($_POST['nome']) && isset($_POST['id'])) {
 // PARTE 2: Exibir o formulário (Carregar dados)
 } else if (isset($_POST['id'])) {
     $idBuscado = $_POST['id'];
-    $lista = $usuarioDAO->listarUsuarios();
+    $lista = $usuarioDAO->listarUsuario();
     $usuario = null;
 
     foreach ($lista as $u) {
