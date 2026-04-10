@@ -19,11 +19,12 @@ DROP TABLE IF EXISTS avaliacoes;
 DROP TABLE IF EXISTS seguidores;
 DROP TABLE IF EXISTS login;
 DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS planos;
 DROP TABLE IF EXISTS perfil;
 DROP TABLE IF EXISTS musicas;
 
 -- =========================================
--- PERFIL
+-- PERFIL (permissão)
 -- =========================================
 CREATE TABLE perfil (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,7 +32,16 @@ CREATE TABLE perfil (
 );
 
 -- =========================================
--- USUARIO (SEM SENHA)
+-- PLANOS (assinatura)
+-- =========================================
+CREATE TABLE planos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE,
+    descricao TEXT
+);
+
+-- =========================================
+-- USUARIO
 -- =========================================
 CREATE TABLE usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,9 +49,12 @@ CREATE TABLE usuario (
     bio TEXT,
     status TINYINT(1) DEFAULT 1,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    perfil_id INT NOT NULL,
 
-    FOREIGN KEY (perfil_id) REFERENCES perfil(id)
+    perfil_id INT NOT NULL,
+    plano_id INT NOT NULL,
+
+    FOREIGN KEY (perfil_id) REFERENCES perfil(id),
+    FOREIGN KEY (plano_id) REFERENCES planos(id)
 );
 
 -- =========================================
@@ -175,11 +188,16 @@ INSERT INTO perfil (nome) VALUES
 ('usuario'),
 ('admin');
 
+-- PLANOS
+INSERT INTO planos (nome, descricao) VALUES
+('free', 'Plano gratuito com limitações'),
+('premium', 'Plano completo sem anúncios');
+
 -- USUARIOS
-INSERT INTO usuario (nome, perfil_id) VALUES
-('João Silva', 1),
-('Maria Santos', 1),
-('Administrador', 2);
+INSERT INTO usuario (nome, perfil_id, plano_id) VALUES
+('João Silva', 1, 1),
+('Maria Santos', 1, 2),
+('Administrador', 2, 2);
 
 -- LOGIN
 INSERT INTO login (email, senha, usuario_id) VALUES
@@ -193,4 +211,7 @@ INSERT INTO musicas (titulo, artista, genero) VALUES
 ('Musica B', 'Artista B', 'Rock');
 
 -- TESTE
-SELECT * FROM usuario;
+SELECT u.nome, p.nome AS perfil, pl.nome AS plano
+FROM usuario u
+JOIN perfil p ON u.perfil_id = p.id
+JOIN planos pl ON u.plano_id = pl.id;
