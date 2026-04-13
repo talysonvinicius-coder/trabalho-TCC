@@ -13,6 +13,13 @@ $generos = [
     ['nome' => 'Clássica', 'classe' => 'classica', 'link' => 'classica.php'],
     ['nome' => 'Lo-fi', 'classe' => 'lofi', 'link' => 'lofi.php'],
     ['nome' => 'Country', 'classe' => 'country', 'link' => 'country.php'],
+    // novos estilos
+    ['nome' => 'Forró & Brega', 'classe' => 'forro', 'link' => 'forro.php' ],
+    ['nome' => 'Cristã', 'classe' => 'crista', 'link' => 'crista.php' ],
+    ['nome' => 'K-pop', 'classe' => 'kpop', 'link' => 'kpop.php' ],
+    ['nome' => 'Trap/Rap', 'classe' => 'rap-trap', 'link' => 'estilo-classico.php'], 
+
+
 ];
 ?>
 

@@ -12,7 +12,7 @@ $generos = [
     ['nome' => 'Reggae', 'classe' => 'reggae'],
     ['nome' => 'Clássica', 'classe' => 'classica'],
     ['nome' => 'Lo-fi', 'classe' => 'lofi'],
-    ['nome' => 'Country', 'classe' => 'country'],
+    ['nome' => 'Countr', 'classe' => 'countr'],
 ];
 ?>
 
