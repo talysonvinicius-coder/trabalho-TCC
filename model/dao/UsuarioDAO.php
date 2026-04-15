@@ -7,14 +7,35 @@ class UsuarioDAO {
  public function cadastrarUsuario(UsuarioDTO $usuarioDTO) {
  try {
  $pdo = Conexao::getConexao();
- $sql = "INSERT INTO usuario (nome, email, senha) VALUES (?,
-?, ?)";
- $stmt = $pdo->prepare($sql);
- $stmt->bindValue(1, $usuarioDTO->getNome());
- $stmt->bindValue(2, $usuarioDTO->getEmail());
- $stmt->bindValue(3, md5($usuarioDTO->getSenha()));
- return $stmt->execute();
+ 
+ // Inicia transação para garantir integridade dos dados
+ $pdo->beginTransaction();
+ 
+ // Insere na tabela usuario
+ $sqlUsuario = "INSERT INTO usuario (nome, perfil_id, plano_id, status) VALUES (?, ?, ?, 1)";
+ $stmtUsuario = $pdo->prepare($sqlUsuario);
+ $stmtUsuario->bindValue(1, $usuarioDTO->getNome());
+ $stmtUsuario->bindValue(2, $usuarioDTO->getPerfilId() ?? 1); // Padrão: perfil 'usuario'
+ $stmtUsuario->bindValue(3, $usuarioDTO->getPlanoId() ?? 1); // Padrão: plano 'free'
+ $stmtUsuario->execute();
+ 
+ // Obtém o ID do usuário inserido
+ $usuarioId = $pdo->lastInsertId();
+ 
+ // Insere na tabela login
+ $sqlLogin = "INSERT INTO login (email, senha, usuario_id, ativo) VALUES (?, ?, ?, 1)";
+ $stmtLogin = $pdo->prepare($sqlLogin);
+ $stmtLogin->bindValue(1, $usuarioDTO->getEmail());
+ $stmtLogin->bindValue(2, md5($usuarioDTO->getSenha()));
+ $stmtLogin->bindValue(3, $usuarioId);
+ $stmtLogin->execute();
+ 
+ // Confirma a transação
+ $pdo->commit();
+ return true;
  } catch (PDOException $e) {
+ // Desfaz a transação em caso de erro
+ $pdo->rollBack();
  echo "Erro ao cadastrar: " . $e->getMessage();
  return false;
  }
@@ -24,8 +45,10 @@ class UsuarioDAO {
  public function listarUsuario() {
  try {
  $pdo = Conexao::getConexao();
- // Buscamos o status para que a View saiba se mostra o botão Ativar ou Desativar
- $sql = "SELECT id, nome, email, status FROM usuario";
+ // Busca usuários e seus emails da tabela login
+ $sql = "SELECT u.id, u.nome, l.email, u.status 
+         FROM usuario u
+         LEFT JOIN login l ON u.id = l.usuario_id";
  $stmt = $pdo->prepare($sql);
  $stmt->execute();
  return $stmt->fetchAll(PDO::FETCH_ASSOC);

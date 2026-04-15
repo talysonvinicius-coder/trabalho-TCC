@@ -8,6 +8,8 @@ class UsuarioDTO {
  private $nome;
  private $email;
  private $senha;
+ private $perfil_id;
+ private $plano_id;
 
  // Getters
  public function getId() {
@@ -26,6 +28,14 @@ class UsuarioDTO {
  return $this->senha;
  }
 
+ public function getPerfilId() {
+ return $this->perfil_id;
+ }
+
+ public function getPlanoId() {
+ return $this->plano_id;
+ }
+
  // Setters
  public function setId($id) {
  $this->id = $id;
@@ -41,6 +51,14 @@ class UsuarioDTO {
 
  public function setSenha($senha) {
  $this->senha = $senha;
+ }
+
+ public function setPerfilId($perfil_id) {
+ $this->perfil_id = $perfil_id;
+ }
+
+ public function setPlanoId($plano_id) {
+ $this->plano_id = $plano_id;
  }
 }
 ?>

@@ -42,11 +42,6 @@ method="post">
         </p> 
 
         <p> 
-            <label for="igenero">Gênero musical favorito:<br></label>
-            <input type="text" name="genero" id="igenero" placeholder="ex: HipHop">
-        </p> 
-
-        <p> 
             <label for="isenha">Crie uma senha:</label><br>
             <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" minlength="5" required>
         </p> 
@@ -55,7 +50,6 @@ method="post">
     </form>
 </div>
     
-   </fieldset>
     </form>
         
     </div>   
