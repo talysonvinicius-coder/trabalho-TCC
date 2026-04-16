@@ -32,9 +32,10 @@ integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbIT
 
         <div class="login-card">
             <h2 style="font-size: 20px; opacity: 0.5; letter-spacing: 4px; margin-bottom: 25px;">Fazer Login</h2>
-           <form action="../trabalho-html/paginicial.php">
-            <input type="text" placeholder="Nome">
-            <input type="password" placeholder="Senha">
+           <form action="controller/LoginControl.php" method="POST" autocomplete="on">
+            <input type="text" name="usuario" placeholder="Usuário">
+            <input type="password" name="senha" placeholder="Senha">
+            <input type="hidden" name="acao" value="login">
             <button>Entrar</button> <br>
             </form>
             <p> Não tem conta? <a href="cadastro.php">Registre-se </a></p>

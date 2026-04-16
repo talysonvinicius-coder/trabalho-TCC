@@ -45,6 +45,13 @@ method="post">
             <label for="isenha">Crie uma senha:</label><br>
             <input type="password" name="senha" id="isenha" placeholder="Digite sua senha" minlength="5" required>
         </p> 
+<p>
+      <label for="iperfil">Perfil:</label><br>
+        <select name="perfil" required>
+            <option value="cliente">Cliente</option>
+            <option value="admin">Admin</option>
+        </select>
+</p>
 
         <button type="submit">Cadastrar</button>
     </form>

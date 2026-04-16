@@ -84,5 +84,25 @@ class UsuarioDAO {
  return false;
  }
  }
+
+ // Método para buscar usuário para login
+ public function buscarParaLogin($email) {
+ try {
+ $pdo = Conexao::getConexao();
+ $sql = "SELECT u.nome, l.senha, l.ativo, u.perfil_id FROM usuario u JOIN login l ON u.id = l.usuario_id WHERE l.email = ?";
+ $stmt = $pdo->prepare($sql);
+ $stmt->bindValue(1, $email);
+ $stmt->execute();
+ $result = $stmt->fetch(PDO::FETCH_ASSOC);
+ if ($result) {
+ $result['perfil'] = $result['perfil_id'] == 1 ? 'cliente' : 'admin';
+ unset($result['perfil_id']);
+ }
+ return $result;
+ } catch (PDOException $e) {
+ echo "Erro ao buscar: " . $e->getMessage();
+ return false;
+ }
+ }
 } // Fim da classe UsuarioDAO
 ?>
