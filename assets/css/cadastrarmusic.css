@@ -13,7 +13,7 @@ body {
 
 .container {
   width: 100%;
-  height: 100%;
+ 
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -31,6 +31,7 @@ body {
   background-color: #294C60;
   padding: 25px;
   border-radius: 15px;
+  text-align: center;
 }
 
 .register-form h2{
@@ -71,6 +72,14 @@ body {
 
 .register-form button {
   padding: 15px;
+  background-color: #001B2E;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.register-form select {
+  padding: 7px 20px;
   background-color: #001B2E;
   color: #fff;
   border: none;

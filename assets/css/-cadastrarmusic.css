@@ -1,0 +1,131 @@
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: linear-gradient(#121212, #000000);
+  font-family: Arial, sans-serif;
+  color: #fff;
+  font-size: large;
+}
+
+/* CONTAINER */
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* TÍTULO */
+.container .title {
+  font-size: 2rem;
+  margin: 20px auto;
+  color: #1DB954; /* verde Spotify */
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+/* FORM */
+.register-form {
+  margin: 0 auto;
+  background-color: #181818;
+  padding: 30px;
+  border-radius: 10px;
+  width: 320px;
+
+  box-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
+
+/* TÍTULO DO FORM */
+.register-form h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* FIELDSET */
+.register-fieldset {
+  background-color: #121212;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+}
+
+/* INPUTS */
+.register-form input {
+  font-size: medium;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+
+  border-radius: 5px;
+  border: 1px solid #333;
+
+  background-color: #121212;
+  color: #fff;
+
+  text-align: center;
+  transition: 0.2s;
+}
+
+/* FOCO */
+.register-form input:focus {
+  outline: none;
+  border: 1px solid #1DB954;
+  box-shadow: 0 0 5px #1DB954;
+}
+
+/* SELECT */
+.register-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+
+  background-color: #121212;
+  color: #fff;
+
+  border: 1px solid #333;
+  border-radius: 5px;
+
+  text-align: center;
+}
+
+/* BOTÃO */
+.register-form button {
+  width: 100%;
+  padding: 14px;
+
+  background-color: #1DB954;
+  color: #000;
+
+  border: none;
+  border-radius: 50px;
+
+  font-weight: bold;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+/* HOVER */
+.register-form button:hover {
+  background-color: #1ed760;
+  transform: scale(1.05);
+}
+
+/* BOTÃO DO FIELDSET */
+.register-fieldset button {
+  background-color: #fff;
+  color: #000;
+  border-radius: 20px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 500px) {
+  .register-form {
+    width: 90%;
+  }
+}
