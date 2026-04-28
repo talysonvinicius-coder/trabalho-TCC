@@ -89,7 +89,7 @@ class UsuarioDAO {
  public function buscarParaLogin($email) {
  try {
  $pdo = Conexao::getConexao();
- $sql = "SELECT u.nome, l.senha, l.ativo, u.perfil_id FROM usuario u JOIN login l ON u.id = l.usuario_id WHERE l.email = ?";
+ $sql = "SELECT u.nome, u.status, l.senha, l.ativo, u.perfil_id FROM usuario u JOIN login l ON u.id = l.usuario_id WHERE l.email = ?";
  $stmt = $pdo->prepare($sql);
  $stmt->bindValue(1, $email);
  $stmt->execute();

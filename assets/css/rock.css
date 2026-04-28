@@ -1,104 +1,154 @@
+/* Variáveis Temáticas Rock */
+:root {
+    --bg-black: #050505;
+    --bg-card: #121212;
+    --bg-card-hover: #1a1a1a;
+    --rock-red: #e61919;      /* Vermelho vibrante para substituir o verde */
+    --score-color: #ffc107;   /* Estrelas douradas */
+    --text-grey: #888888;
+    --border-rock: #333333;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-     background-image: url('../img/rock.png');
-    background-size: cover;
-    /* cobre toda a tela */
-    background-position: center;
-    /* centraliza a imagem */
-    color: #fff;
     margin: 0;
-    padding: 0;
-    text-align: center;
-    font-size: larger;
-    font-weight: bold;
-}
-
-.container {
-    width: 100%;
-    height: 100%;
+    background-color: var(--bg-black);
+    /* Se quiser a imagem de fundo que você mencionou antes, descomente a linha abaixo */
+    /* background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('../img/rock.png'); */
+    background-size: cover;
+    background-attachment: fixed;
+    color: white;
     display: flex;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    color: #fff;
+    font-family: 'Impact', 'Arial Black', sans-serif; /* Fonte mais pesada */
 }
 
-.container fieldset {
-    border: none;
-}
-
-.musica h2{
-  margin: 10px 0 10px 0;
-}
-
-.register-form {
-    margin: 0 auto;
-  background-color: #294C60;
+/* Sidebar Estilo Rock */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    background: #000;
     padding: 25px;
-    border-radius: 15px;
+    border-right: 2px solid var(--rock-red);
 }
 
+.sidebar .logo {
+    color: var(--rock-red);
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    font-style: italic;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 0px #fff;
+}
+
+.content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 40px;
+}
+
+/* Título da Página */
+h2.title {
+    text-transform: uppercase;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    border-left: 5px solid var(--rock-red);
+    padding-left: 15px;
+    margin-bottom: 40px;
+}
+
+/* Alinhamento dos Cards em Grade */
+fieldset {
+    border: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 0;
+}
+
+/* Estilização do Card Rock */
 .musica {
+    background-color: var(--bg-card);
+    padding: 25px;
+    border-radius: 4px; /* Menos arredondado para parecer mais bruto */
+    border: 1px solid var(--border-rock);
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
 }
 
-.musica input {
-    font-size: medium;
-    padding: 10px 20px;
-    margin-bottom: 5px;
-    border-radius: 8px;
-    border: none;
+.musica:hover {
+    background-color: var(--bg-card-hover);
+    border-color: var(--rock-red);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(230, 25, 25, 0.2);
 }
 
-.musica textarea {
-    font-size: medium;
-    padding: 20px 20px;
-    margin: 5px 0px;
-    border-radius: 8px;
-    border: none;
+.musica h2 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    height: 45px;
+    text-transform: uppercase;
+    color: #eee;
 }
 
-.musica select {
-  font-size: medium;
-    padding: 9px 10px;
-    margin: 10px 100px;
-    border-radius: 8px;
-    width: 50%;
-}
-input {
-  font-size: large;
-  color: #fff;
-  padding: 15px 15px;
-  background-color: #001B2E;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+/* Sistema de Estrelas Corrigido */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse; 
+    justify-content: center;
+    gap: 3px;
 }
 
-.star-rating{
-  margin: 0 auto;
-  display: inline-flex;
-  flex-direction: row-reverse;
-  align-content: space-between;
+.star-rating input {
+    display: none;
 }
 
-.star-rating label{
-  font-size: xx-large;
-  padding: 0 15px;
-  cursor: pointer;
+.star-rating label {
+    font-size: 1.8rem;
+    color: #252525;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.star-rating input{
-  position:fixed;
-  opacity:0;
-  left:-90000px;
-}
-
-.star-rating input:focus + label {
- outline: 2px dotted black;
-}
-
+/* Efeito de preenchimento */
+.star-rating label:hover,
+.star-rating label:hover ~ label,
 .star-rating input:checked ~ label {
-  color: gold;
+    color: var(--score-color);
+    text-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+}
+
+/* Botões de Ação */
+.actions {
+    grid-column: 1 / -1;
+    margin-top: 50px;
+    display: flex;
+    gap: 20px;
+}
+
+input[type="button"] {
+    padding: 15px 35px;
+    border-radius: 0; /* Quadrado estilo Rock */
+    border: none;
+    font-family: 'Impact', sans-serif;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.2s;
+    background-color: #222;
+    color: white;
+}
+
+input[value="Avançar"], input[value="Próximo"] {
+    background-color: var(--rock-red);
+}
+
+input[type="button"]:hover {
+    transform: scale(1.05) skewX(-5deg);
+    background-color: var(--rock-red);
+    box-shadow: 4px 4px 0px white;
 }

@@ -84,7 +84,7 @@ $generos = [
     </div>
 
     <div class="footer-area">
-        <button class="btn-voltar" onclick="window.location.href='index.php'">Voltar para Login</button>
+        <button class="btn-voltar" onclick="window.location.href='index.php'">Voltar Para Página Inicial</button>
     </div>
 
     <div class="audio-visualizer">

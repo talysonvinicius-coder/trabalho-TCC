@@ -7,11 +7,21 @@
     <link rel="stylesheet" href="./assets/css/hh.css">
 </head>
 <body>
-    <?php 
-        include("./partials/navbar.php");
-    ?>
-    <div class="container">
-        <div class="register-form">
+    <aside class="sidebar">
+        <div class="logo">🎶 SoundScore</div>
+        <nav>
+            <ul>
+                <li><a href="paginicial.php">Início</a></li>
+                <li><a href="buscar.php">Buscar</a></li>
+                <li><a href="biblioteca.php">Biblioteca</a></li>
+                <li><a href="premium.php">Premium</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <div class="container">
+            <div class="register-form">
             <fieldset>
                 <div class="musica">
                     <h2>50 cent-In da Club</h2>
@@ -50,9 +60,10 @@
             </div>
         
             </fieldset>
-            <a href="paginicial.php"> <input type="button" value="Voltar para página inicial"> 
-            <a href="teste.php"> <input type="button" value="Finalizar"> 
+            <a href="paginicial.php"><input type="button" value="Voltar para página inicial"></a>
+            <a href="teste.php"><input type="button" value="Finalizar"></a>
         </div>
     </div>
+    </main>
 </body>
 </html>

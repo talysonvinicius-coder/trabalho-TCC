@@ -1,6 +1,6 @@
 <?php
 // Importa o DAO para buscar os usuários no banco
-require_once '../Model/dao/UsuarioDAO.php';
+require_once '../model/dao/UsuarioDAO.php';
 // Instancia o DAO e busca a lista de usuários
 $usuarioDAO = new UsuarioDAO();
 $usuarios = $usuarioDAO->listarUsuario();
@@ -64,6 +64,6 @@ $usuarios = $usuarioDAO->listarUsuario();
     </table>
 
     <br>
-    <a href="../index.php">Voltar</a>
+   <button type="button" onclick="window.location.href='../index.php'">Voltar</button>
 </body>
 </html>

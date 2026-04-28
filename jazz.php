@@ -4,14 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./assets/css/jazz.css">
+    <link rel="stylesheet" href="./assets/css/hh.css">
 </head>
 <body>
-    <?php 
-        include("./partials/navbar.php");
-    ?>
+    <aside class="sidebar">
+        <div class="logo">🎶 SoundScore</div>
+        <nav>
+            <ul>
+                <li class="active"><a href="paginicial.php">Início</a></li>
+                <li><a href="buscar.php">Buscar</a></li>
+                <li><a href="biblioteca.php">Biblioteca</a></li>
+                <li><a href="premium.php">Premium</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+   <main class="content">
     <div class="container">
-        <div class="register-form">
+        <h2>Avalie suas faixas de Jazz</h2>
+        
             <fieldset>
             <div class="musica">
               <h2>  Elis Regina-Águas de Março </h2>
@@ -74,8 +85,10 @@
                     </div>
             </div>
             </fieldset> 
-            <a href="paginicial.php"> <input type="button" value="Voltar para página inicial"> 
-            <a href="jazz2.php"> <input type="button" value="Avançar"> 
+                <div class="actions">
+                    <a href="paginicial.php"><input type="button" value="Voltar para página inicial"></a>
+                    <a href="jazz2.php"><input type="button" value="Avançar" style="background-color: var(--spotify-green); color: white;"></a>
+                </div> 
         </div>
     </div>   
 </body>
