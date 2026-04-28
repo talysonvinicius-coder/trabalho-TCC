@@ -1,10 +1,10 @@
-Email enviado: talys@gmail.com
+Email enviado: laurasil@gmail.com
 Senha enviada: 123456
 MD5 da senha: e10adc3949ba59abbe56e057f20f883e
 Dados do banco:
 Array
 (
-    [nome] => talys
+    [nome] => Laura
     [status] => 1
     [senha] => e10adc3949ba59abbe56e057f20f883e
     [ativo] => 1

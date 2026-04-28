@@ -49,6 +49,48 @@ $generos = [
             transform: translateY(0);
         }
         .card { position: relative; }
+        .genre-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .genre-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .genre-card h2 { font-size: 1.1rem; margin-bottom: 12px; font-weight: 400; color: #fff; }
+        .genre-card button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.7);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .genre-card button:hover { background: white; color: black; }
+        .genre-card.hiphop    { border-bottom: 3px solid #7b4fb6; }
+        .genre-card.jazz      { border-bottom: 3px solid #3b5998; }
+        .genre-card.pop       { border-bottom: 3px solid #3498db; }
+        .genre-card.eletronica{ border-bottom: 3px solid #5d5d6a; }
+        .genre-card.rock      { border-bottom: 3px solid #e74c3c; }
+        .genre-card.mpb       { border-bottom: 3px solid #5c6bc0; }
+        .genre-card.sertanejo { border-bottom: 3px solid #f1c40f; }
+        .genre-card.funk      { border-bottom: 3px solid #e67e22; }
+        .genre-card.reggae    { border-bottom: 3px solid #7e57c2; }
+        .genre-card.classica  { border-bottom: 3px solid #ecf0f1; }
+        .genre-card.lofi      { border-bottom: 3px solid #9b59b6; }
+        .genre-card.country   { border-bottom: 3px solid #a0522d; }
+        .genre-card.forro     { border-bottom: 3px solid #ff5733; }
+        .genre-card.crista    { border-bottom: 3px solid #ffffff; }
+        .genre-card.kpop      { border-bottom: 3px solid #ff69b4; }
+        .genre-card.rap-trap  { border-bottom: 3px solid #616161; }
     </style>
 </head>
 <body>
@@ -60,24 +102,13 @@ $generos = [
                 <li class="active">
                     <i class="fas fa-home"></i> Início
                 </li>
-
-                <li>
-                    <a href="buscar.php">
-                        <i class="fas fa-search"></i> Buscar
-                    </a>
-                </li>
                <li>
                 <a href="biblioteca.php">
                     <i class="fas fa-book"></i> Sua Biblioteca
                 </a>
                </li>
-                <li>
-                    <a href="premium.php">
-                        <i class="fas fa-lock"></i> Adquirir Premium
-                    </a>
-                </li>
                 <li class="sidebar-profile">
-                    <i class="fas fa-user"></i> Ver Perfil
+                    <i class="fas fa-user"></i> Ver Perfil  
                 </li>
             </ul>
         </nav>
@@ -112,6 +143,26 @@ $generos = [
             </div>
             <img src="https://picsum.photos/seed/music1/400/220" alt="Destaque" class="featured-img">
         </div>
+
+        <section class="mb-4">
+            <div class="section-header">
+                <h2>Suas Categorias</h2>
+                <a href="buscar.php" class="see-all">Ver tudo</a>
+            </div>
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                <?php foreach ($generos as $g): ?>
+                <div class="col">
+                    <div class="genre-card <?php echo $g['classe']; ?>">
+                        <h2><?php echo $g['nome']; ?></h2>
+                        <form action="<?php echo $g['link']; ?>" method="GET">
+                            <input type="hidden" name="genero" value="<?php echo $g['nome']; ?>">
+                            <button type="submit">Visualizar Músicas</button>
+                        </form>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
 
         <section class="mb-4">
             <div class="section-header">
@@ -170,58 +221,13 @@ $generos = [
             </div>
         </section>
 
-        <section class="mb-4">
-            <div class="section-header">
-                <h2>Suas Categorias</h2>
-                <a href="buscar.php" class="see-all">Ver tudo</a>
-            </div>
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                <?php foreach ($generos as $g): ?>
-                <div class="col">
-                    <a href="<?php echo $g['link']; ?>" style="text-decoration:none">
-                        <div class="category-card" style="--cat-color:<?php echo $g['color']; ?>">
-                            <h4><?php echo $g['nome']; ?></h4>
-                        </div>
-                    </a>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </section>
+
 
     </main>
 
-    <footer class="player">
-        <div class="now-playing">
-            <img src="https://picsum.photos/seed/music1/200" alt="Atual">
-            <div>
-                <div class="song-title">Midnight City</div>
-                <div class="song-artist">M83</div>
-            </div>
-        </div>
-
-        <div class="player-controls">
-            <div class="buttons">
-                <i class="fas fa-random secondary"></i>
-                <i class="fas fa-step-backward"></i>
-                <i class="fas fa-play-circle main"></i>
-                <i class="fas fa-step-forward"></i>
-                <i class="fas fa-redo secondary"></i>
-            </div>
-            <div class="progress-container">
-                <span class="time">1:20</span>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
-                <span class="time">3:45</span>
-            </div>
-        </div>
-
-        <div class="volume-controls">
-            <i class="fas fa-volume-up"></i>
-            <div class="volume-bar">
-                <div class="volume-fill"></div>
-            </div>
-            <i class="fas fa-heart player-like"></i>
+    <footer class="player" style="padding:0; overflow:hidden; height:90px;">
+        <div class="now-playing" style="width:100%; height:100%;">
+            <img src="https://i0.statig.com.br/bancodeimagens/8g/0j/64/8g0j64xs7c6nw0zned15uclbq.jpg" alt="Atual" style="width:100%; height:100%; object-fit:cover; display:block;">
         </div>
     </footer>
 
