@@ -112,7 +112,7 @@ $generos = [
                 </li>
             </ul>
         </nav>
-        <div class="sidebar-premium-banner">
+        <div class="sidebar-premium-banner" style="margin-top:10px;">
             <i class="fas fa-star mb-2" style="color:#ffc107;font-size:1.4rem"></i>
             <p>Ouça sem limites com o <strong>Premium</strong></p>
             <a href="premium.php" class="btn-premium-sidebar">Experimente grátis</a>
@@ -133,12 +133,12 @@ $generos = [
         <!-- Banner destaque -->
         <div class="featured-banner mb-4">
             <div class="featured-info">
-                <span class="featured-tag">🔥 Em alta agora</span>
+                <span class="featured-tag">🔥Avaliações em alta</span>
                 <h1>Midnight City</h1>
                 <p>M83 • Álbum: Hurry Up, We're Dreaming</p>
                 <div class="d-flex gap-2 mt-3">
-                    <button class="btn-play-featured"><i class="fas fa-play me-2"></i>Reproduzir</button>
-                    <button class="btn-like-featured"><i class="far fa-heart me-2"></i>Curtir</button>
+                    <button class="btn-play-featured" onclick="abrirComentario()"><i class="fas fa-comment me-2"></i>Comentar</button>
+                    <button class="btn-like-featured" id="btn-curtir" onclick="toggleCurtir(this)"><i class="far fa-heart me-2"></i>Curtir</button>
                 </div>
             </div>
             <img src="https://picsum.photos/seed/music1/400/220" alt="Destaque" class="featured-img">
@@ -225,22 +225,95 @@ $generos = [
 
     </main>
 
-    <footer class="player" style="padding:0; overflow:hidden; height:90px;">
-        <div class="now-playing" style="width:100%; height:100%;">
-            <img src="https://i0.statig.com.br/bancodeimagens/8g/0j/64/8g0j64xs7c6nw0zned15uclbq.jpg" alt="Atual" style="width:100%; height:100%; object-fit:cover; display:block;">
+    <!-- Modal de Comentário -->
+    <div id="modal-comentario" style="display:none; position:fixed; inset:0; z-index:9999;
+        background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); justify-content:center; align-items:center;">
+        <div style="background:rgba(30,30,40,0.92); border:1px solid rgba(255,255,255,0.15);
+            border-radius:16px; padding:32px; width:100%; max-width:480px; margin:0 16px;">
+            <h5 style="color:#fff; margin-bottom:6px;"><i class="fas fa-comment me-2"></i>Comentar</h5>
+            <p style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-bottom:16px;">Midnight City — M83</p>
+            <textarea id="texto-comentario" rows="5" placeholder="Escreva seu comentário..."
+                style="width:100%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
+                border-radius:10px; color:#fff; padding:12px; resize:none; outline:none; font-size:0.9rem;"></textarea>
+            <div style="display:flex; gap:10px; margin-top:14px;">
+                <button onclick="enviarComentario()" style="flex:1; background:#e53935; border:none;
+                    color:#fff; padding:10px; border-radius:20px; cursor:pointer; font-size:0.9rem; transition:0.3s;">
+                    <i class="fas fa-paper-plane me-2"></i>Enviar
+                </button>
+                <button onclick="fecharComentario()" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+                    color:rgba(255,255,255,0.7); padding:10px; border-radius:20px; cursor:pointer; font-size:0.9rem; transition:0.3s;">
+                    Cancelar
+                </button>
+            </div>
         </div>
-    </footer>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Tooltips Bootstrap
-        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-        // Like toggle no player
-        document.querySelector('.player-like').addEventListener('click', function() {
-            this.classList.toggle('fas');
-            this.classList.toggle('far');
-            this.style.color = this.classList.contains('fas') ? '#1db954' : '';
-        });
-    </script>
+   <!-- Rodapé do Player -->
+<footer class="player" style="padding:0; overflow:hidden; height:50px; position: fixed; bottom: 0; width: 100%;">
+    <div class="now-playing" style="width:100%; height:100%; background: #000;">
+        <img id="slideshow-img" 
+             src="https://statig.com.br"
+             style="width:100%; height:100%; object-fit:cover; display:block; transition: opacity 1s ease;">
+    </div>
+</footer>
+
+<script>
+    const slides = [
+        'https://img.freepik.com/vetores-premium/um-cartaz-de-publicidade-musical-com-um-disco-de-vinil-e-notas-musicais-em-uma-ilustracao-vetorial-isolada_606304-808.jpg',
+        'https://png.pngtree.com/thumb_back/fh260/background/20221224/pngtree-blue-musical-notes-background-image_1530362.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_5qs5i8zvZ2TQptBz3UOxKhFS-Te9heBoDA&s',
+        'https://thumbs.dreamstime.com/b/grande-nota-musical-%C3%A9-uma-trepada-sobre-fundo-abstrato-para-publicidade-em-lojas-e-est%C3%BAdios-de-m%C3%BAsica-gerada-por-ai-334831956.jpg'
+    ];
+
+    let current = 0;
+    const img = document.getElementById('slideshow-img');
+
+    // Função para trocar a imagem
+    function mudarSlide() {
+        // 1. Começa o fade out (fica transparente)
+        img.style.opacity = '0';
+
+        // 2. Espera o fade out terminar (1 segundo) para trocar a fonte
+        setTimeout(() => {
+            current = (current + 1) % slides.length;
+            img.src = slides[current];
+            
+            // 3. Faz o fade in (volta a aparecer)
+            img.style.opacity = '1';
+        }, 1000); 
+    }
+
+    // Executa a função a cada 30 segundos (300000 milissegundos)
+    setInterval(mudarSlide, 30000);
+
+    // Curtir no banner destaque
+    function toggleCurtir(btn) {
+        const icon = btn.querySelector('i');
+        const curtido = icon.classList.contains('fas');
+        icon.classList.toggle('fas', !curtido);
+        icon.classList.toggle('far', curtido);
+        btn.style.color = curtido ? '' : '#e53935';
+        btn.style.borderColor = curtido ? '' : '#e53935';
+        btn.innerHTML = curtido
+            ? '<i class="far fa-heart me-2"></i>Curtir'
+            : '<i class="fas fa-heart me-2"></i>Curtido';
+    }
+
+    // Modal de comentário
+    function abrirComentario() {
+        const modal = document.getElementById('modal-comentario');
+        modal.style.display = 'flex';
+    }
+    function fecharComentario() {
+        document.getElementById('modal-comentario').style.display = 'none';
+        document.getElementById('texto-comentario').value = '';
+    }
+    function enviarComentario() {
+        const texto = document.getElementById('texto-comentario').value.trim();
+        if (!texto) return;
+        fecharComentario();
+    }
+</script>
+
 </body>
 </html>
