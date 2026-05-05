@@ -1,152 +1,74 @@
-/* RESET E CONFIGURAÇÕES GERAIS */
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    font-family: 'Segoe UI', Tahoma, sans-serif; 
+/* Estilos do modal de comentário (complementa global.css) */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    justify-content: center;
+    align-items: center;
 }
 
-body { 
-    background-color: #0a0b10; 
-    color: white; 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    min-height: 100vh; 
-    padding: 120px 0 80px 0;
+.modal-overlay.aberto { display: flex; }
+
+.modal-box {
+    background: rgba(30,30,40,0.92);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 16px;
 }
 
-/* HEADER */
-.header { 
-    position: fixed; 
-    top: 30px; 
-    text-align: center; 
-    z-index: 10; 
-    width: 100%; 
+.modal-box h5 { color: #fff; margin-bottom: 6px; }
+
+.modal-subtitulo {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
 }
 
-.header h1 { 
-    font-size: 2.8rem; 
-    letter-spacing: 10px; 
-    text-transform: uppercase; 
-    color: #b3f0ff; 
-    text-shadow: 0 0 15px rgba(0, 225, 255, 0.5); 
-    font-weight: 300; 
+.modal-box textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    font-size: 0.9rem;
 }
 
-/* GRID CONTAINER */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px;
-    width: 90%;
-    max-width: 1100px;
-    margin-bottom: 20px;
+.modal-acoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
 }
 
-/* CARDS */
-.card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 25px 15px;
-    text-align: center;
-    transition: 0.3s;
-}
-
-.card:hover { 
-    transform: translateY(-5px); 
-    background: rgba(255, 255, 255, 0.08); 
-}
-
-.card h2 { 
-    font-size: 1.1rem; 
-    margin-bottom: 12px; 
-    font-weight: 400; 
-}
-
-.card button {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    padding: 8px 16px;
+.btn-enviar {
+    flex: 1;
+    background: #e53935;
+    border: none;
+    color: #fff;
+    padding: 10px;
     border-radius: 20px;
     cursor: pointer;
-    transition: 0.3s;
+    font-size: 0.9rem;
+    transition: background 0.2s;
 }
 
-.card button:hover { 
-    background: white; 
-    color: black; 
-}
+.btn-enviar:hover { background: #c62828; }
 
-/* CORES DAS BORDAS DOS GÊNEROS */
-.hiphop { border-bottom: 3px solid #7b4fb6; }
-.jazz { border-bottom: 3px solid #3b5998; }
-.pop { border-bottom: 3px solid #3498db; }
-.eletronica { border-bottom: 3px solid #5d5d6a; }
-.rock { border-bottom: 3px solid #e74c3c; }
-.mpb { border-bottom: 3px solid #5c6bc0; }
-.sertanejo { border-bottom: 3px solid #f1c40f; }
-.funk { border-bottom: 3px solid #e67e22; }
-.reggae { border-bottom: 3px solid #7e57c2; }
-.classica { border-bottom: 3px solid #ecf0f1; }
-.lofi { border-bottom: 3px solid #9b59b6; }
-.country { border-bottom: 3px solid #a0522d; }
-
-/* FOOTER E BOTÃO VOLTAR */
-.footer-area {
-    margin-top: 20px;
-}
-
-.btn-voltar {
-    background: transparent;
-    border: 2px solid;
-    border-image: linear-gradient(to right, #00d4ff, #9b59b6) 1;
-    color: white;
-    padding: 10px 30px;
+.btn-cancelar {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    padding: 10px;
+    border-radius: 20px;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: 0.3s;
-}
-
-.btn-voltar:hover {
-    opacity: 0.8;
-}
-
-/* VISUALIZADOR DE ÁUDIO */
-.audio-visualizer {
-    display: flex; 
-    align-items: flex-end; 
-    justify-content: center; 
-    gap: 4px;
-    height: 50px; 
-    position: fixed; 
-    bottom: 0; 
-    width: 100%; 
-    pointer-events: none;
-}
-
-.bar { 
-    width: 5px; 
-    border-radius: 2px 2px 0 0; 
-}
-
-/* RESPONSIVIDADE */
-@media (max-width: 900px) {
-    .grid-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 500px) {
-    .grid-container {
-        grid-template-columns: 1fr;
-    }
-    .header h1 {
-        font-size: 1.8rem;
-        letter-spacing: 5px;
-    }
+    font-size: 0.9rem;
 }

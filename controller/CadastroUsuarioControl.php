@@ -23,14 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
  $usuarioDAO = new UsuarioDAO();
  $resultado = $usuarioDAO->cadastrarUsuario($usuarioDTO);
 
+echo $resultado;
+
  // Exibe alerta JavaScript com o resultado
  if ($resultado) {
  echo "<script>
  alert('Usuário cadastrado com sucesso!');
- window.location.href = '../concluido.php';
+ window.location.href = '../index.php';
  </script>";
  } else {
- echo "<script>
+ echo "$resultado <script>
  alert('Erro ao cadastrar usuário!');
  window.location.href = '../cadastro.php';
  </script>";

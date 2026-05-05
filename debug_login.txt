@@ -1,14 +1,15 @@
-Email enviado: laurasil@gmail.com
+Email enviado: talys@gmail.com
 Senha enviada: 123456
 MD5 da senha: e10adc3949ba59abbe56e057f20f883e
 Dados do banco:
 Array
 (
-    [nome] => Laura 
+    [id] => 5
+    [nome] => talys
     [status] => 1
-    [senha] => e10adc3949ba59abbe56e057f20f883e
+    [senha] => $2y$10$eggAN3Z0P/E68G2.nGSAM.q99GYQSrGyjxAD8mW2DapsXdGWNyyfO
     [ativo] => 1
     [perfil] => cliente
 )
 
-Comparação: md5(senha) === banco_senha? SIM
+Comparação: md5(senha) === banco_senha? NÃO

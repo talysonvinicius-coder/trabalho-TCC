@@ -18,12 +18,7 @@ h1 {
   text-shadow: 2px 2px #000;
 }
 
-table {
-  width: 90%;
-  margin: 0 auto;
-  border-collapse: collapse;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
+
 
 td {
   border: 2px solid #fff;

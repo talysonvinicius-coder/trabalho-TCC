@@ -44,7 +44,8 @@ fieldset {
     padding: 20px;
     border-radius: 10px;
     display: flex;
-    flex-direction: column; /* Título em cima, estrelas embaixo */
+    flex-direction: column;
+    /* Título em cima, estrelas embaixo */
     align-items: center;
     text-align: center;
     transition: 0.3s;
@@ -57,15 +58,14 @@ fieldset {
 .musica h2 {
     font-size: 1rem;
     margin-bottom: 15px;
-    height: 40px; /* Mantém alinhamento se o nome for longo */
+    height: 40px;
+    /* Mantém alinhamento se o nome for longo */
 }
 
-/* Sistema de Estrelas - Lógica para preencher da esquerda para direita */
-/* Sistema de Estrelas Corrigido */
-/* 1. Container em ordem NORMAL */
+/* Sistema de estrelas */
 .star-rating {
     display: flex;
-    flex-direction: row; /* Ordem normal: 1 na esquerda, 5 na direita */
+    flex-direction: row-reverse;
     justify-content: center;
     gap: 5px;
 }
@@ -76,27 +76,21 @@ fieldset {
 
 .star-rating label {
     font-size: 1.8rem;
-    color: #333; /* Cor da estrela vazia */
+    color: #333;
     cursor: pointer;
     transition: color 0.2s;
 }
 
-/* 2. A MÁGICA: Quando houver um hover ou check no container, 
-   pintamos TODAS as estrelas de dourado... */
-.star-rating:hover label,
-.star-rating:has(input:checked) label {
+.star-rating label:hover,
+.star-rating label:hover~label,
+.star-rating input:checked~label {
     color: var(--score-color);
 }
 
-/* 3. ...MAS, as estrelas que estiverem DEPOIS do mouse ou DEPOIS do input marcado, 
-   nós voltamos para o cinza. Isso cria o efeito de preencher da esquerda para direita. */
-.star-rating label:hover ~ label,
-.star-rating input:checked ~ label {
-    color: #333;
-}
 /* Botões */
 .actions {
-    grid-column: 1 / -1; /* Faz os botões ocuparem a linha toda abaixo dos cards */
+    grid-column: 1 / -1;
+    /* Faz os botões ocuparem a linha toda abaixo dos cards */
     margin-top: 30px;
     display: flex;
     gap: 15px;

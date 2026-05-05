@@ -1,0 +1,169 @@
+:root {
+    --bg-black:      #000000;
+    --bg-card:       #181818;
+    --bg-card-hover: #282828;
+    --accent-green:  #1db954;
+    --score-color:   #ffc107;
+    --text-grey:     #b3b3b3;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-black);
+    color: white;
+    display: flex;
+    font-family: sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    background: black;
+    padding: 20px;
+}
+
+.sidebar .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #7c4dff, #4fc3f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sidebar nav ul { list-style: none; padding: 0; }
+
+.sidebar nav li {
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.sidebar nav li a {
+    color: var(--text-grey);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: block;
+    transition: color 0.2s;
+}
+
+.sidebar nav li a:hover { color: white; }
+
+/* Conteúdo */
+.content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 40px;
+    min-height: 100vh;
+}
+
+.content h2 {
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+}
+
+/* Grade de músicas */
+fieldset {
+    border: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* Card de música */
+.musica {
+    background-color: var(--bg-card);
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.musica:hover { background-color: var(--bg-card-hover); }
+
+.musica h2 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    min-height: 40px;
+}
+
+/* Textarea de opinião */
+.musica label {
+    font-size: 0.85rem;
+    color: var(--text-grey);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.musica textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px;
+    resize: vertical;
+    outline: none;
+    font-size: 0.85rem;
+    min-height: 80px;
+}
+
+/* Sistema de estrelas */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 5px;
+}
+
+.star-rating input { display: none; }
+
+.star-rating label {
+    font-size: 1.8rem;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: var(--score-color);
+}
+
+/* Botões de ação */
+.actions {
+    grid-column: 1 / -1;
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-acao {
+    padding: 12px 25px;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    background: var(--bg-card-hover);
+    color: white;
+    transition: background 0.2s;
+}
+
+.btn-acao:hover { background: #333; }
+
+.btn-acao.primario {
+    background-color: var(--accent-green);
+    color: white;
+}
+
+.btn-acao.primario:hover { background-color: #1aa34a; }

@@ -1,102 +1,137 @@
-/* CSS INTEGRADO */
-        * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            background-color: #121212; 
-            color: #ffffff; 
-        }
+* { box-sizing: border-box; }
 
-        .app-container { 
-            display: flex; 
-            height: 100vh; 
-        }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #121212;
+    color: #ffffff;
+}
 
-        /* Menu Lateral */
-        .sidebar { 
-            width: 240px; 
-            background-color: #000000; 
-            padding: 20px; 
-            display: flex;
-            flex-direction: column;
-        }
+.app-container {
+    display: flex;
+    height: 100vh;
+}
 
-        .sidebar h2 { color: #1DB954; font-size: 1.5rem; margin-bottom: 30px; }
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background-color: #000000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
 
-        .sidebar ul { list-style: none; padding: 0; }
+.sidebar h2 { color: #1db954; font-size: 1.5rem; margin-bottom: 30px; }
+.sidebar h2 a { color: inherit; text-decoration: none; }
 
-        .sidebar li { 
-            padding: 12px; 
-            cursor: pointer; 
-            color: #b3b3b3; 
-            transition: 0.3s;
-            border-radius: 4px;
-        }
+.sidebar ul { list-style: none; padding: 0; }
 
-        .sidebar li:hover { color: white; background-color: #282828; }
+.sidebar li {
+    padding: 12px;
+    cursor: pointer;
+    color: #b3b3b3;
+    transition: 0.3s;
+    border-radius: 4px;
+}
 
-        /* Área de Conteúdo */
-        .content { 
-            flex: 1; 
-            padding: 40px; 
-            overflow-y: auto;
-            background: linear-gradient(to bottom, #1e1e1e, #121212);
-        }
+.sidebar li:hover { color: white; background-color: #282828; }
 
-        .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.4s; }
+/* Conteúdo */
+.content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+    background: linear-gradient(to bottom, #1e1e1e, #121212);
+}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.mix-card {
+    background: #282828;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
 
-        /* Estilo Playlists */
-        .premium-btn { 
-            padding: 12px 24px; 
-            background-color: #1DB954; 
-            border: none; 
-            border-radius: 50px; 
-            color: black; 
-            font-weight: bold;
-            cursor: pointer; 
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
+.mix-card p { color: #b3b3b3; }
 
-        .premium-btn:hover { transform: scale(1.05); background-color: #1ed760; }
+/* Páginas */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.4s; }
 
-        #playlist-list { 
-            list-style: none; 
-            padding: 0; 
-            margin-top: 20px;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
-        .playlist-item { 
-            padding: 15px; 
-            background-color: #181818; 
-            margin-bottom: 10px; 
-            border-radius: 8px;
-            border: 1px solid #282828;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.playlists-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
 
-        .playlist-item span { font-weight: 500; }
-        .tag-premium { font-size: 0.7rem; background: #fbbf24; color: black; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+/* Botões */
+.premium-btn {
+    padding: 12px 24px;
+    background-color: #1db954;
+    border: none;
+    border-radius: 50px;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
 
-        /* Estilo do botão de excluir */
-        .btn-delete {
-            background: none;
-            border: none;
-            color: #b3b3b3;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: 0.2s;
-        }
+.premium-btn:hover { transform: scale(1.05); background-color: #1ed760; }
 
-        .btn-delete:hover {
-            color: #ff4d4d;
-            transform: scale(1.2);
-        }
+/* Playlists */
+#playlist-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.playlist-item {
+    padding: 15px;
+    background-color: #181818;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #282828;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.playlist-item span { font-weight: 500; }
+
+.tag-premium {
+    font-size: 0.7rem;
+    background: #fbbf24;
+    color: black;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.btn-delete {
+    background: none;
+    border: none;
+    color: #b3b3b3;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: 0.2s;
+}
+
+.btn-delete:hover { color: #ff4d4d; transform: scale(1.2); }
+
+/* Benefícios */
+.beneficios {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.beneficios li {
+    padding: 12px 0;
+    border-bottom: 1px solid #282828;
+    font-size: 1rem;
+}

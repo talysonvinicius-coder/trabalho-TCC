@@ -11,6 +11,7 @@ $usuarios = $usuarioDAO->listarUsuario();
     <meta charset="UTF-8">
     <title>Listar Usuários</title>
     <link rel="stylesheet" href="../assets/css/estilo.css">
+    
 </head>
 <body>
     <h1>Lista de Usuários</h1>

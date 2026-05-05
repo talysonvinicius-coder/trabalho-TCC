@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundScore | Administração de Usuários</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+    <h1>Administração de Usuários</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-usuarios">
+            <tr><td colspan="5">Carregando...</td></tr>
+        </tbody>
+    </table>
+
+    <a href="paginicial.html" class="btn-voltar">Voltar</a>
+
+    <!-- Modal de edição -->
+    <div id="modal-editar" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Editar Usuário</h2>
+            <form id="form-editar">
+                <input type="hidden" name="id" id="edit-id">
+
+                <label for="edit-nome">Nome</label>
+                <input type="text" name="nome" id="edit-nome" required>
+
+                <label for="edit-email">Email</label>
+                <input type="email" name="email" id="edit-email" required>
+
+                <label for="edit-senha">Nova Senha <small style="color:#777;">(deixe vazio para manter)</small></label>
+                <input type="password" name="senha" id="edit-senha">
+
+                <div class="modal-acoes">
+                    <button type="submit" class="btn-salvar">Salvar</button>
+                    <button type="button" class="btn-cancelar-modal" onclick="fecharModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

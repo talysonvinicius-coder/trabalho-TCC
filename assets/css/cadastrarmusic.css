@@ -86,3 +86,13 @@ body {
   border-radius: 5px;
   cursor: pointer;
 }
+
+.msg-erro {
+  background: #c62828;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  text-align: left;
+}
