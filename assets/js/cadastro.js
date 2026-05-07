@@ -12,9 +12,11 @@ document.getElementById('form-cadastro').addEventListener('submit', async (e) =>
     }
 
     const body = new URLSearchParams({
-        nome:  form.nome.value,
-        email: form.email.value,
-        senha: senha
+        nome:      form.nome.value,
+        email:     form.email.value,
+        senha:     senha,
+        perfil_id: form.perfil_id.value,
+        plano_id:  form.plano_id.value
     });
 
     try {

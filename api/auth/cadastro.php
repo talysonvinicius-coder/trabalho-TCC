@@ -10,9 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$nome  = trim($_POST['nome'] ?? '');
-$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-$senha = $_POST['senha'] ?? '';
+$nome     = trim($_POST['nome'] ?? '');
+$email    = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+$senha    = $_POST['senha'] ?? '';
+$perfilId = (int)($_POST['perfil_id'] ?? 1);
+$planoId  = (int)($_POST['plano_id'] ?? 1);
 
 if (!$nome || !$email || !$senha) {
     echo json_encode(['ok' => false, 'erro' => 'Preencha todos os campos']);
@@ -33,8 +35,8 @@ $usuarioDTO = new UsuarioDTO();
 $usuarioDTO->setNome($nome);
 $usuarioDTO->setEmail($email);
 $usuarioDTO->setSenha($senha);
-$usuarioDTO->setPerfilId(1);
-$usuarioDTO->setPlanoId(1);
+$usuarioDTO->setPerfilId($perfilId);
+$usuarioDTO->setPlanoId($planoId);
 
 $usuarioDAO = new UsuarioDAO();
 

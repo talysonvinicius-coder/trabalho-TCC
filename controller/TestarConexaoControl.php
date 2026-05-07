@@ -28,4 +28,4 @@ try {
 }
 
 // Link para voltar ao menu
-echo "<br><a href='../cadastro.php' style='text-decoration: none; color: #3498db; font-family: sans-serif;'>← Voltar para o Início</a>";
+echo "<br><a href='../cadastro.html' style='text-decoration: none; color: #3498db; font-family: sans-serif;'> ← Voltar para o Início </a>";
