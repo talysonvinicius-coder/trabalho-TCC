@@ -1,27 +1,12 @@
 -- =========================================
 -- BANCO
 -- =========================================
+DROP DATABASE IF EXISTS bdmusica;
 CREATE DATABASE IF NOT EXISTS bdmusica
 DEFAULT CHARACTER SET utf8mb4
 DEFAULT COLLATE utf8mb4_general_ci;
 
 USE bdmusica;
-
--- =========================================
--- DROP (ordem correta)
--- =========================================
-DROP TABLE IF EXISTS denuncias;
-DROP TABLE IF EXISTS lista_musicas;
-DROP TABLE IF EXISTS listas;
-DROP TABLE IF EXISTS curtidas;
-DROP TABLE IF EXISTS comentarios;
-DROP TABLE IF EXISTS avaliacoes;
-DROP TABLE IF EXISTS seguidores;
-DROP TABLE IF EXISTS login;
-DROP TABLE IF EXISTS usuario;
-DROP TABLE IF EXISTS planos;
-DROP TABLE IF EXISTS perfil;
-DROP TABLE IF EXISTS musicas;
 
 -- =========================================
 -- PERFIL (permissão)
@@ -71,6 +56,17 @@ CREATE TABLE login (
 );
 
 -- =========================================
+-- GENERO
+-- =========================================
+CREATE TABLE genero (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    descricao TEXT,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================================
 -- MUSICAS
 -- =========================================
 CREATE TABLE musicas (
@@ -78,8 +74,22 @@ CREATE TABLE musicas (
     titulo VARCHAR(150) NOT NULL,
     artista VARCHAR(150) NOT NULL,
     album VARCHAR(150),
+    genero_id INT,
+    data_lancamento DATE,
+    FOREIGN KEY (genero_id) REFERENCES genero(id)
+);
+
+-- =========================================
+-- ALBUM
+-- =========================================
+CREATE TABLE album (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    artista VARCHAR(150) NOT NULL,
     genero VARCHAR(100),
-    data_lancamento DATE
+    data_lancamento DATE,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================================
@@ -205,10 +215,15 @@ INSERT INTO login (email, senha, usuario_id) VALUES
 ('maria@email.com', MD5('123456'), 2),
 ('admin@email.com', MD5('admin123'), 3);
 
+-- GENEROS
+INSERT INTO genero (nome, descricao, status) VALUES
+('Pop', 'Gênero Pop', 1),
+('Rock', 'Gênero Rock', 1);
+
 -- MUSICAS
-INSERT INTO musicas (titulo, artista, genero) VALUES
-('Musica A', 'Artista A', 'Pop'),
-('Musica B', 'Artista B', 'Rock');
+INSERT INTO musicas (titulo, artista, album, genero_id) VALUES
+('Musica A', 'Artista A', NULL, 1),
+('Musica B', 'Artista B', NULL, 2);
 
 -- TESTE
 SELECT u.nome, p.nome AS perfil, pl.nome AS plano

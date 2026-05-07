@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoundScore | Cadastro</title>
+    <title>SoundScore | Criar Categoria</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/login.css">
     <style>
         .login-card { width: 360px; }
 
-        select {
+        select, textarea {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -19,6 +19,7 @@
             color: white;
             outline: none;
             box-sizing: border-box;
+            resize: vertical;
         }
 
         select option { background: #05070a; }
@@ -31,6 +32,18 @@
             margin-bottom: 4px;
             letter-spacing: 1px;
         }
+
+        .btn-secondary {
+            width: 80%;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.14);
+        }
     </style>
 </head>
 <body>
@@ -40,40 +53,29 @@
 
     <div class="login-card">
         <h2 style="font-size: 20px; opacity: 0.5; letter-spacing: 4px; margin-bottom: 25px;">
-            Criar Conta
+            Criar Categoria
         </h2>
 
         <div id="msg-erro" class="alert alert-danger" style="display:none; padding:8px; font-size:14px;"></div>
+        <div id="msg-sucesso" class="alert alert-success" style="display:none; padding:8px; font-size:14px;"></div>
 
-        <form id="form-cadastro" autocomplete="on">
-            <label for="inome">Nome</label>
-            <input type="text" name="nome" id="inome" placeholder="Nome Completo" minlength="3" maxlength="100" required>
+        <form id="form-categoria" action="controller/CategoriaControl.php" method="POST" autocomplete="on">
+            <label for="nomeCategoria">Nome da categoria</label>
+            <input type="text" name="nome" id="nomeCategoria" placeholder="Ex: Pop, Rock, Jazz" maxlength="100" required>
 
-            <label for="iemail">Email</label>
-            <input type="email" name="email" id="iemail" placeholder="seuemail@exemplo.com" required>
+            <label for="descricaoCategoria">Descrição</label>
+            <textarea name="descricao" id="descricaoCategoria" rows="4" placeholder="Descrição da categoria"></textarea>
 
-            <label for="isenha">Senha</label>
-            <input type="password" name="senha" id="isenha" placeholder="Mínimo 5 caracteres" minlength="5" required>
-
-            <label for="iconfirma">Confirme a senha</label>
-            <input type="password" name="confirma" id="iconfirma" placeholder="Repita a senha" minlength="5" required>
-
-            <label for="iperfil">Perfil</label>
-            <select name="perfil_id" id="iperfil" required>
-                <option value="1">Usuário</option>
-                <option value="2">Admin</option>
+            <label for="statusCategoria">Status</label>
+            <select name="status" id="statusCategoria" required>
+                <option value="1">Ativa</option>
+                <option value="0">Inativa</option>
             </select>
 
-            <label for="iplano">Plano</label>
-            <select name="plano_id" id="iplano" required>
-                <option value="1">Free</option>
-                <option value="2">Premium</option>
-            </select>
-
-            <button type="submit">Cadastrar</button>
+            <button type="submit">Salvar Categoria</button>
         </form>
 
-        <p style="margin-top: 16px;">Já tem conta? <a href="index.html">Fazer login</a></p>
+        <a href="homeAdmin.html" class="btn btn-secondary">Voltar ao Painel Admin</a>
     </div>
 
     <div class="waves-box">
@@ -93,6 +95,20 @@
 </div>
 
 <script src="assets/js/app.js"></script>
-<script src="assets/js/cadastro.js"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const msgErro = params.get('erro');
+    const msgSucesso = params.get('sucesso');
+    if (msgErro) {
+        const el = document.getElementById('msg-erro');
+        el.textContent = decodeURIComponent(msgErro);
+        el.style.display = 'block';
+    }
+    if (msgSucesso) {
+        const el = document.getElementById('msg-sucesso');
+        el.textContent = decodeURIComponent(msgSucesso);
+        el.style.display = 'block';
+    }
+</script>
 </body>
 </html>
