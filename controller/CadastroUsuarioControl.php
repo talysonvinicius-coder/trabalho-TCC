@@ -1,41 +1,52 @@
 <?php
-//Controller responsável por processar o cadastro de usuário
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once '../model/dto/UsuarioDTO.php';
+require_once '../model/dao/UsuarioDAO.php';
 
-require_once '../Model/dto/UsuarioDTO.php';
-require_once '../Model/dao/UsuarioDAO.php';
-// Verifica se o formulário foi enviado via POST
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
- // Recebe os dados do formulário
- $nome = $_POST['nome'];
- $email = $_POST['email'];
- $senha = $_POST['senha'];
-
- // Instancia o DTO e preenche com os dados
- $usuarioDTO = new UsuarioDTO();
- $usuarioDTO->setNome($nome);
- $usuarioDTO->setEmail($email);
- $usuarioDTO->setSenha($senha);
-
- // Instancia o DAO e chama o método de cadastro
- $usuarioDAO = new UsuarioDAO();
- $resultado = $usuarioDAO->cadastrarUsuario($usuarioDTO);
-
-echo $resultado;
-
- // Exibe alerta JavaScript com o resultado
- if ($resultado) {
- echo "<script>
- alert('Usuário cadastrado com sucesso!');
- window.location.href = '../index.php';
- </script>";
- } else {
- echo "$resultado <script>
- alert('Erro ao cadastrar usuário!');
- window.location.href = '../cadastro.php';
- </script>";
- }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../cadastro.php');
+    exit();
 }
+
+$nome     = trim($_POST['nome'] ?? '');
+$email    = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+$senha    = $_POST['senha'] ?? '';
+$confirma = $_POST['confirma'] ?? '';
+$perfilId = (int)($_POST['perfil_id'] ?? 1);
+$planoId  = (int)($_POST['plano_id'] ?? 1);
+
+if (!$nome || !$email || !$senha || !$confirma) {
+    header('Location: ../cadastro.php?erro=' . urlencode('Preencha todos os campos'));
+    exit();
+}
+
+if (strlen($nome) < 3) {
+    header('Location: ../cadastro.php?erro=' . urlencode('Nome deve ter ao menos 3 caracteres'));
+    exit();
+}
+
+if (strlen($senha) < 5) {
+    header('Location: ../cadastro.php?erro=' . urlencode('Senha deve ter ao menos 5 caracteres'));
+    exit();
+}
+
+if ($senha !== $confirma) {
+    header('Location: ../cadastro.php?erro=' . urlencode('As senhas não coincidem'));
+    exit();
+}
+
+$usuarioDTO = new UsuarioDTO();
+$usuarioDTO->setNome($nome);
+$usuarioDTO->setEmail($email);
+$usuarioDTO->setSenha($senha);
+$usuarioDTO->setPerfilId($perfilId);
+$usuarioDTO->setPlanoId($planoId);
+
+$usuarioDAO = new UsuarioDAO();
+
+if ($usuarioDAO->cadastrarUsuario($usuarioDTO)) {
+    header('Location: ../index.html?cadastro=1');
+} else {
+    header('Location: ../cadastro.php?erro=' . urlencode('E-mail já cadastrado ou erro interno'));
+}
+exit();
 ?>
