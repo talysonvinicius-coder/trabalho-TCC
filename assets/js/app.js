@@ -6,7 +6,7 @@ async function verificarSessao(exigeAdmin = false) {
         const dados = await res.json();
 
         if (!dados.logado) {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
             return null;
         }
 
@@ -17,14 +17,14 @@ async function verificarSessao(exigeAdmin = false) {
 
         return dados;
     } catch {
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
         return null;
     }
 }
 
 async function logout() {
     await fetch('api/auth/logout.php', { method: 'POST' });
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
 }
 
 function mostrarErro(elementId, mensagem) {

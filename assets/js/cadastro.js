@@ -24,7 +24,7 @@ document.getElementById('form-cadastro').addEventListener('submit', async (e) =>
         const dados = await res.json();
 
         if (dados.ok) {
-            window.location.href = 'index.html?cadastro=1';
+            window.location.href = 'login.html?cadastro=1';
         } else {
             mostrarErro('msg-erro', dados.erro);
         }
