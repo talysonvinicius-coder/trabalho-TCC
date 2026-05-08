@@ -61,7 +61,7 @@
         </form>
 
         <p style="margin-top: 16px; text-align: center;">
-            Já tem conta? <a href="index.html">Fazer login</a>
+            Já tem conta? <a href="login.html">Fazer login</a>
         </p>
     </div>
 </div>

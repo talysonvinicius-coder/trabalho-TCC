@@ -44,7 +44,7 @@ $usuarioDTO->setPlanoId($planoId);
 $usuarioDAO = new UsuarioDAO();
 
 if ($usuarioDAO->cadastrarUsuario($usuarioDTO)) {
-    header('Location: ../index.html?cadastro=1');
+    header('Location: ../login.html?cadastro=1');
 } else {
     header('Location: ../cadastro.php?erro=' . urlencode('E-mail já cadastrado ou erro interno'));
 }
