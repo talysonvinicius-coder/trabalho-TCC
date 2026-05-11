@@ -22,7 +22,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         const dados = await res.json();
 
         if (dados.ok) {
-            window.location.href = dados.perfil === 'admin' ? 'homeAdmin.html' : 'paginicial.html';
+            window.location.href = dados.perfil === 'admin' ? 'homeAdmin.php' : 'paginicial.html';
         } else {
             mostrarErro('msg-erro', dados.erro);
         }

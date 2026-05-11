@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    <!-- Navbar separada em navbar.php -->
+    <?php include __DIR__ . '/navbar.php'; ?>
 
     <main class="content">
         <header class="top-bar">
@@ -31,7 +31,7 @@
                 <h1>Bem-vindo, administrador</h1>
                 <p>Controle usuários, revise relatórios e monitore atividades do sistema.</p>
                 <div class="d-flex gap-2 mt-3">
-                    <button class="btn-play-featured" onclick="window.location.href='usuarios.html'">
+                    <button class="btn-play-featured" onclick="window.location.href='usuario.php'">
                         <i class="fas fa-users-cog me-2"></i>Gerenciar Usuários
                     </button>
                     <button class="btn-like-featured" onclick="window.location.href='paginicial.html'">
@@ -45,14 +45,20 @@
         <section class="mb-4">
             <div class="section-header">
                 <h2>Atalhos rápidos</h2>
-                <a href="usuarios.html" class="see-all">Ver tudo</a>
+                <a href="usuario.php" class="see-all">Ver tudo</a>
             </div>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
                 <div class="col"><div class="card">
                     <img src="https://picsum.photos/seed/admin2/200" alt="Usuários">
-                    <button class="card-img-overlay-play" onclick="window.location.href='usuarios.html'"><i class="fas fa-users"></i></button>
+                    <button class="card-img-overlay-play" onclick="window.location.href='usuario.php'"><i class="fas fa-users"></i></button>
                     <h4>Usuários</h4>
                     <p>Gerencie contas, status e permissões.</p>
+                </div></div>
+                <div class="col"><div class="card">
+                    <img src="https://picsum.photos/seed/admin8/200" alt="Categorias">
+                    <button class="card-img-overlay-play" onclick="window.location.href='categoria.php'"><i class="fas fa-folder-open"></i></button>
+                    <h4>Categorias</h4>
+                    <p>Gerencie categorias, organização e visibilidade.</p>
                 </div></div>
                 <div class="col"><div class="card">
                     <img src="https://picsum.photos/seed/admin3/200" alt="Relatórios">
