@@ -61,12 +61,6 @@
                     <p>Gerencie categorias, organização e visibilidade.</p>
                 </div></div>
                 <div class="col"><div class="card">
-                    <img src="https://picsum.photos/seed/admin3/200" alt="Relatórios">
-                    <button class="card-img-overlay-play"><i class="fas fa-chart-line"></i></button>
-                    <h4>Relatórios</h4>
-                    <p>Veja desempenho e acessos recentes.</p>
-                </div></div>
-                <div class="col"><div class="card">
                     <img src="https://picsum.photos/seed/admin4/200" alt="Configurações">
                     <button class="card-img-overlay-play"><i class="fas fa-cogs"></i></button>
                     <h4>Configurações</h4>
@@ -81,13 +75,6 @@
                 <a href="#" class="see-all">Ver tudo</a>
             </div>
             <div class="row row-cols-1 row-cols-md-3 g-3">
-                <div class="col"><div class="card card-icon-only text-center py-4">
-                    <button class="btn btn-light btn-lg rounded-circle mb-3" onclick="window.location.href='categoria.php'">
-                        <i class="fas fa-folder-plus fa-2x"></i>
-                    </button>
-                    <h4>Criar Categoria</h4>
-                    <p>Adicione novas categorias para organizar o conteúdo.</p>
-                </div></div>
                 <div class="col"><div class="card card-icon-only text-center py-4">
                     <button class="btn btn-light btn-lg rounded-circle mb-3" onclick="window.location.href='album.html'">
                         <i class="fas fa-compact-disc fa-2x"></i>

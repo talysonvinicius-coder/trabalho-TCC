@@ -2,7 +2,8 @@
     <div class="logo">🎶 SoundScore</div>
     <nav>
         <ul>
-            <li class="active"><i class="fas fa-home"></i> Painel Admin</li>
+            <li class="active">
+                <a href="homeAdmin.php"><i class="fas fa-home"></i> Painel Admin</a></li>
             <li>
                 <a href="usuario.php"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a>
             </li>
