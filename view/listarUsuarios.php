@@ -65,6 +65,6 @@ $usuarios = $usuarioDAO->listarUsuario();
     </table>
 
     <br>
-   <button type="button" onclick="window.location.href='../homeAdmin.html'">Voltar</button>
+   <button type="button" onclick="window.location.href='../homeAdmin.php'">Voltar</button>
 </body>
 </html>
