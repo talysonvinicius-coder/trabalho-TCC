@@ -34,7 +34,7 @@
                     <button class="btn-play-featured" onclick="window.location.href='usuario.php'">
                         <i class="fas fa-users-cog me-2"></i>Gerenciar Usuários
                     </button>
-                    <button class="btn-like-featured" onclick="window.location.href='paginicial.html'">
+                    <button class="btn-like-featured" onclick="window.location.href='paginicial.php'">
                         <i class="fas fa-music me-2"></i>Ir para app
                     </button>
                 </div>
@@ -88,6 +88,39 @@
                     </button>
                     <h4>Criar Música</h4>
                     <p>Adicione músicas novas e associe-as a álbuns e categorias.</p>
+                </div></div>
+            </div>
+        </section>
+
+        <section class="mb-4">
+            <div class="section-header">
+                <h2>Denúncias</h2>
+                <a href="denuncias.php" class="see-all">Ver todas</a>
+            </div>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+                <div class="col"><div class="card artist">
+                    <img src="https://picsum.photos/seed/denunc1/200" alt="Denúncias Pendentes">
+                    <h4><i class="fas fa-flag me-2 text-danger"></i>Denúncias Pendentes</h4>
+                    <p>
+                        <?php
+                            require_once __DIR__ . '/model/dao/Conexao.php';
+                            $pdo = Conexao::getConexao();
+                            $r = $pdo->query("SELECT COUNT(*) FROM denuncias WHERE status = 'Pendente'");
+                            echo '<span class="score-badge">' . ($r ? $r->fetchColumn() : 0) . '</span>';
+                        ?> denúncias aguardando revisão
+                    </p>
+                    <button class="btn btn-sm btn-outline-danger mt-2" onclick="window.location.href='denuncias.php'">Ver denúncias</button>
+                </div></div>
+                <div class="col"><div class="card artist">
+                    <img src="https://picsum.photos/seed/denunc2/200" alt="Comentários Denunciados">
+                    <h4><i class="fas fa-comment-slash me-2 text-warning"></i>Comentários Denunciados</h4>
+                    <p>
+                        <?php
+                            $r2 = $pdo->query("SELECT COUNT(DISTINCT comentario_id) FROM denuncias");
+                            echo '<span class="score-badge">' . ($r2 ? $r2->fetchColumn() : 0) . '</span>';
+                        ?> comentários reportados
+                    </p>
+                    <button class="btn btn-sm btn-outline-warning mt-2" onclick="window.location.href='denuncias.php'">Ver comentários</button>
                 </div></div>
             </div>
         </section>

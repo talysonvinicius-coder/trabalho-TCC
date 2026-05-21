@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="assets/css/global.css">
     <link rel="stylesheet" href="assets/css/paginicial.css">
 </head>
+
 <body>
 
     <!-- Navbar separada em navbar.php -->
@@ -34,7 +36,7 @@
                     <button class="btn-play-featured" onclick="window.location.href='usuarios.html'">
                         <i class="fas fa-users-cog me-2"></i>Gerenciar Usuários
                     </button>
-                    <button class="btn-like-featured" onclick="window.location.href='paginicial.html'">
+                    <button class="btn-like-featured" onclick="window.location.href='paginicial.php'">
                         <i class="fas fa-music me-2"></i>Ir para app
                     </button>
                 </div>
@@ -48,24 +50,31 @@
                 <a href="usuarios.html" class="see-all">Ver tudo</a>
             </div>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                <div class="col"><div class="card">
-                    <img src="https://picsum.photos/seed/admin2/200" alt="Usuários">
-                    <button class="card-img-overlay-play" onclick="window.location.href='usuarios.html'"><i class="fas fa-users"></i></button>
-                    <h4>Usuários</h4>
-                    <p>Gerencie contas, status e permissões.</p>
-                </div></div>
-                <div class="col"><div class="card">
-                    <img src="https://picsum.photos/seed/admin3/200" alt="Relatórios">
-                    <button class="card-img-overlay-play"><i class="fas fa-chart-line"></i></button>
-                    <h4>Relatórios</h4>
-                    <p>Veja desempenho e acessos recentes.</p>
-                </div></div>
-                <div class="col"><div class="card">
-                    <img src="https://picsum.photos/seed/admin4/200" alt="Configurações">
-                    <button class="card-img-overlay-play"><i class="fas fa-cogs"></i></button>
-                    <h4>Configurações</h4>
-                    <p>Ajuste parciais e políticas do app.</p>
-                </div></div>
+                <div class="col">
+                    <div class="card">
+                        <img src="https://picsum.photos/seed/admin2/200" alt="Usuários">
+                        <button class="card-img-overlay-play" onclick="window.location.href='usuarios.html'"><i
+                                class="fas fa-users"></i></button>
+                        <h4>Usuários</h4>
+                        <p>Gerencie contas, status e permissões.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <img src="https://picsum.photos/seed/admin3/200" alt="Relatórios">
+                        <button class="card-img-overlay-play"><i class="fas fa-chart-line"></i></button>
+                        <h4>Relatórios</h4>
+                        <p>Veja desempenho e acessos recentes.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <img src="https://picsum.photos/seed/admin4/200" alt="Configurações">
+                        <button class="card-img-overlay-play"><i class="fas fa-cogs"></i></button>
+                        <h4>Configurações</h4>
+                        <p>Ajuste parciais e políticas do app.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -75,27 +84,36 @@
                 <a href="#" class="see-all">Ver tudo</a>
             </div>
             <div class="row row-cols-1 row-cols-md-3 g-3">
-                <div class="col"><div class="card card-icon-only text-center py-4">
-                    <button class="btn btn-light btn-lg rounded-circle mb-3" onclick="window.location.href='categoria.php'">
-                        <i class="fas fa-folder-plus fa-2x"></i>
-                    </button>
-                    <h4>Criar Categoria</h4>
-                    <p>Adicione novas categorias para organizar o conteúdo.</p>
-                </div></div>
-                <div class="col"><div class="card card-icon-only text-center py-4">
-                    <button class="btn btn-light btn-lg rounded-circle mb-3" onclick="window.location.href='album.html'">
-                        <i class="fas fa-compact-disc fa-2x"></i>
-                    </button>
-                    <h4>Criar Álbum</h4>
-                    <p>Cadastre álbuns novos para compor a biblioteca.</p>
-                </div></div>
-                <div class="col"><div class="card card-icon-only text-center py-4">
-                    <button class="btn btn-light btn-lg rounded-circle mb-3" onclick="window.location.href='musica.html'">
-                        <i class="fas fa-music fa-2x"></i>
-                    </button>
-                    <h4>Criar Música</h4>
-                    <p>Adicione músicas novas e associe-as a álbuns e categorias.</p>
-                </div></div>
+                <div class="col">
+                    <div class="card card-icon-only text-center py-4">
+                        <button class="btn btn-light btn-lg rounded-circle mb-3"
+                            onclick="window.location.href='categoria.php'">
+                            <i class="fas fa-folder-plus fa-2x"></i>
+                        </button>
+                        <h4>Criar Categoria</h4>
+                        <p>Adicione novas categorias para organizar o conteúdo.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card card-icon-only text-center py-4">
+                        <button class="btn btn-light btn-lg rounded-circle mb-3"
+                            onclick="window.location.href='album.html'">
+                            <i class="fas fa-compact-disc fa-2x"></i>
+                        </button>
+                        <h4>Criar Álbum</h4>
+                        <p>Cadastre álbuns novos para compor a biblioteca.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card card-icon-only text-center py-4">
+                        <button class="btn btn-light btn-lg rounded-circle mb-3"
+                            onclick="window.location.href='musica.html'">
+                            <i class="fas fa-music fa-2x"></i>
+                        </button>
+                        <h4>Criar Música</h4>
+                        <p>Adicione músicas novas e associe-as a álbuns e categorias.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -105,30 +123,39 @@
                 <a href="#" class="see-all">Detalhes</a>
             </div>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                <div class="col"><div class="card artist">
-                    <img src="https://picsum.photos/seed/admin5/200" alt="Novos usuários">
-                    <h4>Novos Usuários</h4>
-                    <p><span class="score-badge">+24</span> nesta semana</p>
-                </div></div>
-                <div class="col"><div class="card artist">
-                    <img src="https://picsum.photos/seed/admin6/200" alt="Atividade">
-                    <h4>Atividade</h4>
-                    <p><span class="score-badge">96%</span> do sistema ativo</p>
-                </div></div>
-                <div class="col"><div class="card artist">
-                    <img src="https://picsum.photos/seed/admin7/200" alt="Suporte">
-                    <h4>Suporte</h4>
-                    <p><span class="score-badge">3</span> chamados abertos</p>
-                </div></div>
+                <div class="col">
+                    <div class="card artist">
+                        <img src="https://picsum.photos/seed/admin5/200" alt="Novos usuários">
+                        <h4>Novos Usuários</h4>
+                        <p><span class="score-badge">+24</span> nesta semana</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card artist">
+                        <img src="https://picsum.photos/seed/admin6/200" alt="Atividade">
+                        <h4>Atividade</h4>
+                        <p><span class="score-badge">96%</span> do sistema ativo</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card artist">
+                        <img src="https://picsum.photos/seed/admin7/200" alt="Suporte">
+                        <h4>Suporte</h4>
+                        <p><span class="score-badge">3</span> chamados abertos</p>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer class="player">
-        <img id="slideshow-img" src="https://img.freepik.com/vetores-premium/um-cartaz-de-publicidade-musical-com-um-disco-de-vinil_606304-808.jpg" alt="Admin Player">
+        <img id="slideshow-img"
+            src="https://img.freepik.com/vetores-premium/um-cartaz-de-publicidade-musical-com-um-disco-de-vinil_606304-808.jpg"
+            alt="Admin Player">
     </footer>
 
     <script src="assets/js/app.js"></script>
     <script src="assets/js/homeAdmin.js"></script>
 </body>
+
 </html>

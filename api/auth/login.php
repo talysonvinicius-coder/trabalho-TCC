@@ -20,7 +20,7 @@ if (!$email || empty($senha)) {
 $usuarioDAO = new UsuarioDAO();
 $usuario = $usuarioDAO->buscarParaLogin($email);
 
-if (!$usuario || !password_verify($senha, $usuario['senha'])) {
+if (!$usuario || md5($senha) !== $usuario['senha']) {
     echo json_encode(['ok' => false, 'erro' => 'E-mail ou senha inválidos']);
     exit();
 }

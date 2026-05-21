@@ -1,25 +1,9 @@
 <?php
-// Array com os gêneros musicais (Mantido original)
-$generos = [
-    ['nome' => 'Hip-Hop', 'classe' => 'hiphop', 'link' => 'hiphop.php'],
-    ['nome' => 'Jazz', 'classe' => 'jazz', 'link' => 'jazz.php'],
-    ['nome' => 'POP', 'classe' => 'pop', 'link' => 'pop.php'],
-    ['nome' => 'Música Eletrônica', 'classe' => 'eletronica', 'link' => 'musicaeletro.php'],
-    ['nome' => 'Rock', 'classe' => 'rock', 'link' => 'rock.php'],
-    ['nome' => 'MPB', 'classe' => 'mpb', 'link' => 'mpb.php'],
-    ['nome' => 'Sertanejo', 'classe' => 'sertanejo', 'link' => 'sertanejo.php'],
-    ['nome' => 'Funk', 'classe' => 'funk', 'link' => 'funk.php'],
-    ['nome' => 'Reggae', 'classe' => 'reggae', 'link' => 'reggae.php'],
-    ['nome' => 'Clássica', 'classe' => 'classica', 'link' => 'classica.php'],
-    ['nome' => 'Lo-fi', 'classe' => 'lofi', 'link' => 'lofi.php'],
-    ['nome' => 'Country', 'classe' => 'country', 'link' => 'country.php'],
-    ['nome' => 'Forró & Brega', 'classe' => 'forro', 'link' => 'forro.php' ],
-    ['nome' => 'Cristã', 'classe' => 'crista', 'link' => 'crista.php' ],
-    ['nome' => 'K-pop', 'classe' => 'kpop', 'link' => 'kpop.php' ],
-    ['nome' => 'Trap/Rap', 'classe' => 'rap-trap', 'link' => 'estilo-classico.php'], 
-];
-?>
+$pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
 
+$stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
+$generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,7 +14,6 @@ $generos = [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* Estilos da barra de pesquisa para combinar com o SoundScore */
         .search-box {
             margin: 20px auto;
             max-width: 400px;

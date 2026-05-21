@@ -1,22 +1,12 @@
 <?php
-$generos = [
-    ['nome' => 'Hip-Hop',           'classe' => 'hiphop',    'link' => 'hiphop.php',          'color' => '#e91e63'],
-    ['nome' => 'Jazz',              'classe' => 'jazz',      'link' => 'jazz.php',            'color' => '#ff9800'],
-    ['nome' => 'POP',               'classe' => 'pop',       'link' => 'pop.php',             'color' => '#9c27b0'],
-    ['nome' => 'Música Eletrônica', 'classe' => 'eletronica','link' => 'musicaeletro.php',    'color' => '#00bcd4'],
-    ['nome' => 'Rock',              'classe' => 'rock',      'link' => 'rock.php',            'color' => '#f44336'],
-    ['nome' => 'MPB',               'classe' => 'mpb',       'link' => 'mpb.php',             'color' => '#4caf50'],
-    ['nome' => 'Sertanejo',         'classe' => 'sertanejo', 'link' => 'sertanejo.php',       'color' => '#8d6e63'],
-    ['nome' => 'Funk',              'classe' => 'funk',      'link' => 'funk.php',            'color' => '#ff5722'],
-    ['nome' => 'Reggae',            'classe' => 'reggae',    'link' => 'reggae.php',          'color' => '#388e3c'],
-    ['nome' => 'Clássica',          'classe' => 'classica',  'link' => 'classica.php',        'color' => '#5c6bc0'],
-    ['nome' => 'Lo-fi',             'classe' => 'lofi',      'link' => 'lofi.php',            'color' => '#3f51b5'],
-    ['nome' => 'Country',           'classe' => 'country',   'link' => 'country.php',         'color' => '#795548'],
-    ['nome' => 'Forró & Brega',     'classe' => 'forro',     'link' => 'forro.php',           'color' => '#fbc02d'],
-    ['nome' => 'Cristã',            'classe' => 'crista',    'link' => 'crista.php',          'color' => '#7986cb'],
-    ['nome' => 'K-pop',             'classe' => 'kpop',      'link' => 'kpop.php',            'color' => '#ec407a'],
-    ['nome' => 'Trap/Rap',          'classe' => 'rap-trap',  'link' => 'estilo-classico.php', 'color' => '#616161'],
-];
+try {
+    $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
+    $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
+    $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $generos = [];
+    error_log($e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -107,9 +97,12 @@ $generos = [
                     <i class="fas fa-book"></i> Sua Biblioteca
                 </a>
                </li>
-                <li class="sidebar-profile">
-                    <i class="fas fa-user"></i> Ver Perfil  
+                <li>
+                    <a href="perfil.php">
+                        <i class="fas fa-user"></i> Perfil
                 </li>
+              
+                  
             </ul>
         </nav>
         <div class="sidebar-premium-banner" style="margin-top:10px;">
@@ -146,21 +139,19 @@ $generos = [
 
         <section class="mb-4">
             <div class="section-header">
-                <h2>Suas Categorias</h2>
+                <h2>Categorias</h2>
                 <a href="buscar.php" class="see-all">Ver tudo</a>
             </div>
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                <?php foreach ($generos as $g): ?>
-                <div class="col">
-                    <div class="genre-card <?php echo $g['classe']; ?>">
-                        <h2><?php echo $g['nome']; ?></h2>
-                        <form action="<?php echo $g['link']; ?>" method="GET">
-                            <input type="hidden" name="genero" value="<?php echo $g['nome']; ?>">
-                            <button type="submit">Visualizar Músicas</button>
-                        </form>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+            <div class="generos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                <?php if (count($generos) > 0): ?>
+                    <?php foreach ($generos as $genero): ?>
+                        <a href="genero.php?id=<?php echo htmlspecialchars($genero['id']); ?>" class="btn-genero" style="padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); transition: 0.3s; display: block;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            <?php echo htmlspecialchars($genero['nome']); ?>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="grid-column: 1 / -1; color: rgba(255,255,255,0.5);">Nenhum gênero disponível.</p>
+                <?php endif; ?>
             </div>
         </section>
 

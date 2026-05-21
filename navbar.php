@@ -8,7 +8,10 @@
                 <a href="usuario.php"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a>
             </li>
             <li>
-                <a href="paginicial.html"><i class="fas fa-music"></i> Voltar ao App</a>
+                <a href="denuncias.php"><i class="fas fa-flag"></i> Denúncias</a>
+            </li>
+            <li>
+                <a href="paginicial.php"><i class="fas fa-music"></i> Voltar ao App</a>
             </li>
             <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</li>
         </ul>

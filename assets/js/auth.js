@@ -3,7 +3,7 @@
     try {
         const res = await fetch('api/auth/session.php');
         const dados = await res.json();
-        if (dados.logado) window.location.href = 'paginicial.html';
+        if (dados.logado) window.location.href = 'paginicial.php';
     } catch { /* sem sessão ativa */ }
 })();
 
@@ -22,7 +22,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         const dados = await res.json();
 
         if (dados.ok) {
-            window.location.href = dados.perfil === 'admin' ? 'homeAdmin.php' : 'paginicial.html';
+            window.location.href = dados.perfil === 'admin' ? 'homeAdmin.php' : 'paginicial.php';
         } else {
             mostrarErro('msg-erro', dados.erro);
         }

@@ -21,7 +21,7 @@ class UsuarioDAO {
             $sqlLogin = "INSERT INTO login (email, senha, usuario_id, ativo) VALUES (?, ?, ?, 1)";
             $stmtLogin = $pdo->prepare($sqlLogin);
             $stmtLogin->bindValue(1, $usuarioDTO->getEmail());
-            $stmtLogin->bindValue(2, password_hash($usuarioDTO->getSenha(), PASSWORD_DEFAULT));
+            $stmtLogin->bindValue(2, md5($usuarioDTO->getSenha()));
             $stmtLogin->bindValue(3, $usuarioId);
             $stmtLogin->execute();
 
@@ -83,7 +83,7 @@ class UsuarioDAO {
             if ($usuarioDTO->getSenha()) {
                 $sqlSenha = "UPDATE login SET senha = ? WHERE usuario_id = ?";
                 $stmtSenha = $pdo->prepare($sqlSenha);
-                $stmtSenha->bindValue(1, password_hash($usuarioDTO->getSenha(), PASSWORD_DEFAULT));
+                $stmtSenha->bindValue(1, md5($usuarioDTO->getSenha()));
                 $stmtSenha->bindValue(2, $id);
                 $stmtSenha->execute();
             }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="assets/css/global.css">
     <link rel="stylesheet" href="assets/css/biblioteca.css">
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -16,7 +18,7 @@
         <nav>
             <ul>
                 <li>
-                    <a href="paginicial.html"><i class="fas fa-home"></i> Início</a>
+                    <a href="paginicial.php"><i class="fas fa-home"></i> Início</a>
                 </li>
                 <li class="active"><i class="fas fa-book"></i> Sua Biblioteca</li>
                 <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</li>
@@ -47,7 +49,8 @@
                 <div class="col-auto text-center" style="min-width:120px;">
                     <div class="avg-score" id="avg-score">-</div>
                     <div class="avg-stars mt-2" id="avg-stars"></div>
-                    <p id="total-avaliacoes" style="color:rgba(255,255,255,0.4); font-size:0.78rem; margin-top:6px;"></p>
+                    <p id="total-avaliacoes" style="color:rgba(255,255,255,0.4); font-size:0.78rem; margin-top:6px;">
+                    </p>
                 </div>
                 <div class="col">
                     <p class="section-title mb-3">
@@ -68,4 +71,5 @@
     <script src="assets/js/app.js"></script>
     <script src="assets/js/biblioteca.js"></script>
 </body>
+
 </html>
