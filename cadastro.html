@@ -5,91 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundScore | Cadastro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .login-card { width: 360px; }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.2);
-            color: white;
-            outline: none;
-            box-sizing: border-box;
+        :root {
+            --accent: #7c4dff;
+            --accent-2: #4fc3f7;
+            --bg-dark: #0a0a0a;
+            --bg-card: #181818;
+            --text-grey: #b3b3b3;
         }
 
-        select option { background: #05070a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        label {
-            display: block;
-            text-align: left;
-            font-size: 13px;
-            opacity: 0.6;
-            margin-bottom: 4px;
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        /* Fundo animado */
+        .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18; animation: float 10s ease-in-out infinite; }
+        .orb-1 { width: 400px; height: 400px; background: #7c4dff; top: -100px; left: -100px; animation-delay: 0s; }
+        .orb-2 { width: 300px; height: 300px; background: #4fc3f7; bottom: -80px; right: -80px; animation-delay: 3s; }
+        .orb-3 { width: 200px; height: 200px; background: #7c4dff; top: 40%; right: 15%; animation-delay: 6s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.05); } }
+
+        /* Card */
+        .login-wrapper { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 16px; }
+
+        .brand { text-align: center; margin-bottom: 28px; }
+        .brand h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(90deg, #7c4dff, #4fc3f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        .brand p { font-size: 0.85rem; color: var(--text-grey); margin-top: 4px; }
+
+        .card-login {
+            background: rgba(24,24,24,0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(124,77,255,0.2);
+            border-radius: 20px;
+            padding: 36px 32px;
+        }
+
+        .card-login h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 24px; color: #fff; }
+
+        /* Label */
+        .field-label { font-size: 0.75rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; display: block; }
+
+        /* Inputs */
+        .input-group-custom { position: relative; margin-bottom: 16px; }
+        .input-group-custom i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-grey); font-size: 0.85rem; z-index: 1; }
+        .input-group-custom input,
+        .input-group-custom select {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            padding: 12px 14px 12px 38px;
+            font-size: 0.88rem;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .input-group-custom input:focus,
+        .input-group-custom select:focus { border-color: rgba(124,77,255,0.6); background: rgba(124,77,255,0.06); }
+        .input-group-custom input::placeholder { color: var(--text-grey); }
+        .input-group-custom select option { background: #1a1a2e; color: #fff; }
+
+        /* Divisor de seção */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0 16px;
+            font-size: 0.72rem;
+            color: var(--text-grey);
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
+        .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+
+        /* Botão */
+        .btn-entrar { width: 100%; padding: 12px; border-radius: 25px; border: none; background: linear-gradient(135deg, #7c4dff, #4fc3f7); color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: filter 0.2s, transform 0.2s; margin-top: 8px; }
+        .btn-entrar:hover { filter: brightness(1.12); transform: scale(1.02); }
+
+        /* Mensagem erro */
+        .msg { border-radius: 10px; padding: 10px 14px; font-size: 0.82rem; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+        .msg-erro { background: rgba(229,57,53,0.12); border: 1px solid rgba(229,57,53,0.3); color: #ef5350; }
+
+        .card-login .link-bottom { text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--text-grey); }
+        .card-login .link-bottom a { color: #c4a8ff; text-decoration: none; font-weight: 600; transition: color 0.2s; }
+        .card-login .link-bottom a:hover { color: #fff; }
+
+        /* Ondas */
+        .waves-box { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 0; pointer-events: none; }
+        .waves-svg { display: block; width: 100%; height: 60px; }
+        .onda-roxa  { fill: rgba(124,77,255,0.15); animation: move 7s linear infinite; }
+        .onda-ciano { fill: rgba(79,195,247,0.1);  animation: move 10s linear infinite reverse; }
+        .onda-rosa  { fill: rgba(124,77,255,0.08); animation: move 13s linear infinite; }
+        .onda-branca{ fill: rgba(255,255,255,0.04);animation: move 6s linear infinite reverse; }
+        .onda-verde { fill: rgba(79,195,247,0.06); animation: move 9s linear infinite; }
+        @keyframes move { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <h1 class="brand-name">SoundScore</h1>
+<div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
 
-    <div class="login-card">
-        <h2 style="font-size: 20px; opacity: 0.5; letter-spacing: 4px; margin-bottom: 25px;">
-            Criar Conta
-        </h2>
+<div class="login-wrapper">
+    <div class="brand">
+        <h1>🎶 SoundScore</h1>
+        <p>Crie sua conta e comece a avaliar</p>
+    </div>
 
-        <div id="msg-erro" class="alert alert-danger" style="display:none; padding:8px; font-size:14px;"></div>
+    <div class="card-login">
+        <h2><i class="fas fa-user-plus me-2" style="color:#7c4dff;"></i>Criar Conta</h2>
+
+        <div id="msg-erro" class="msg msg-erro"><i class="fas fa-exclamation-circle"></i><span></span></div>
 
         <form id="form-cadastro" autocomplete="on">
-            <label for="inome">Nome</label>
-            <input type="text" name="nome" id="inome" placeholder="Nome Completo" minlength="3" maxlength="100" required>
 
-            <label for="iemail">Email</label>
-            <input type="email" name="email" id="iemail" placeholder="seuemail@exemplo.com" required>
+            <div class="section-divider">Dados pessoais</div>
 
-            <label for="isenha">Senha</label>
-            <input type="password" name="senha" id="isenha" placeholder="Mínimo 5 caracteres" minlength="5" required>
+            <div class="input-group-custom">
+                <i class="fas fa-user"></i>
+                <input type="text" name="nome" id="inome" placeholder="Nome completo" minlength="3" maxlength="100" required>
+            </div>
+            <div class="input-group-custom">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" id="iemail" placeholder="seuemail@exemplo.com" required>
+            </div>
 
-            <label for="iconfirma">Confirme a senha</label>
-            <input type="password" name="confirma" id="iconfirma" placeholder="Repita a senha" minlength="5" required>
+            <div class="section-divider">Senha</div>
 
-            <label for="iperfil">Perfil</label>
-            <select name="perfil_id" id="iperfil" required>
-                <option value="1">Usuário</option>
-                <option value="2">Admin</option>
-            </select>
+            <div class="input-group-custom">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="senha" id="isenha" placeholder="Mínimo 5 caracteres" minlength="5" required>
+            </div>
+            <div class="input-group-custom">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="confirma" id="iconfirma" placeholder="Repita a senha" minlength="5" required>
+            </div>
 
-            <label for="iplano">Plano</label>
-            <select name="plano_id" id="iplano" required>
-                <option value="1">Free</option>
-                <option value="2">Premium</option>
-            </select>
+            <div class="section-divider">Configurações</div>
 
-            <button type="submit">Cadastrar</button>
+            <div class="input-group-custom">
+                <i class="fas fa-user-shield"></i>
+                <select name="perfil_id" id="iperfil" required>
+                    <option value="1">Usuário</option>
+                    <option value="2">Admin</option>
+                </select>
+            </div>
+            <div class="input-group-custom">
+                <i class="fas fa-crown"></i>
+                <select name="plano_id" id="iplano" required>
+                    <option value="1">Free</option>
+                    <option value="2">Premium</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-entrar">
+                <i class="fas fa-user-plus me-2"></i>Cadastrar
+            </button>
         </form>
 
-        <p style="margin-top: 16px;">Já tem conta? <a href="login.html">Fazer login</a></p>
+        <p class="link-bottom">Já tem conta? <a href="login.html">Fazer login</a></p>
     </div>
+</div>
 
-    <div class="waves-box">
-        <svg class="waves-svg" viewBox="0 24 150 28" preserveAspectRatio="none">
-            <defs>
-                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"/>
-            </defs>
-            <g class="parallax">
-                <use href="#gentle-wave" x="48" y="0" class="onda-ciano"/>
-                <use href="#gentle-wave" x="48" y="3" class="onda-roxa"/>
-                <use href="#gentle-wave" x="48" y="5" class="onda-rosa"/>
-                <use href="#gentle-wave" x="48" y="7" class="onda-branca"/>
-                <use href="#gentle-wave" x="48" y="9" class="onda-verde"/>
-            </g>
-        </svg>
-    </div>
+<div class="waves-box">
+    <svg class="waves-svg" viewBox="0 24 150 28" preserveAspectRatio="none">
+        <defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"/></defs>
+        <g class="parallax">
+            <use href="#gentle-wave" x="48" y="0" class="onda-ciano"/>
+            <use href="#gentle-wave" x="48" y="3" class="onda-roxa"/>
+            <use href="#gentle-wave" x="48" y="5" class="onda-rosa"/>
+            <use href="#gentle-wave" x="48" y="7" class="onda-branca"/>
+            <use href="#gentle-wave" x="48" y="9" class="onda-verde"/>
+        </g>
+    </svg>
 </div>
 
 <script src="assets/js/app.js"></script>

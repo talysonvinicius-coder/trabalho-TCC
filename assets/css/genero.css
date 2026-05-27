@@ -1,27 +1,35 @@
 :root {
-    --bg-black:      #000000;
+    --bg-black:      #0a0a0a;
     --bg-card:       #181818;
-    --bg-card-hover: #282828;
-    --accent-green:  #1db954;
+    --bg-card-hover: #222232;
+    --accent:        #7c4dff;
+    --accent-2:      #4fc3f7;
     --score-color:   #ffc107;
     --text-grey:     #b3b3b3;
 }
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    margin: 0;
     background-color: var(--bg-black);
     color: white;
     display: flex;
-    font-family: sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-/* Sidebar */
+/* ── Sidebar ── */
 .sidebar {
     width: 240px;
     height: 100vh;
     position: fixed;
-    background: black;
-    padding: 20px;
+    background: #000;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
 }
 
 .sidebar .logo {
@@ -39,105 +47,276 @@ body {
     padding: 10px 12px;
     border-radius: 6px;
     margin-bottom: 4px;
+    transition: background 0.2s;
 }
+
+.sidebar nav li:hover { background: #1a1a1a; }
 
 .sidebar nav li a {
     color: var(--text-grey);
     text-decoration: none;
     font-weight: 700;
     font-size: 0.9rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     transition: color 0.2s;
 }
 
 .sidebar nav li a:hover { color: white; }
 
-/* Conteúdo */
+/* ── Conteúdo ── */
 .content {
     margin-left: 240px;
     width: calc(100% - 240px);
+    padding: 40px 40px 80px 0px;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+/* ── Botão voltar ── */
+.btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 9px 20px;
+    border-radius: 25px;
+    background: rgba(124,77,255,0.12);
+    border: 1px solid rgba(124,77,255,0.35);
+    color: #c4a8ff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.btn-voltar:hover {
+    background: rgba(124,77,255,0.25);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateX(-3px);
+}
+
+.btn-voltar i { transition: transform 0.2s; }
+.btn-voltar:hover i { transform: translateX(-3px); }
+
+/* ── Header do gênero ── */
+.genre-header {
+    position: relative;
+    border-radius: 16px;
     padding: 40px;
-    min-height: 100vh;
+    margin-bottom: 36px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-.content h2 {
-    font-size: 1.6rem;
-    margin-bottom: 30px;
+@keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
-/* Grade de músicas */
-fieldset {
-    border: none;
+.genre-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(124,77,255,0.2), transparent 60%);
+}
+
+.genre-header-icon {
+    font-size: 3.5rem;
+    z-index: 1;
+    filter: drop-shadow(0 0 16px rgba(124,77,255,0.6));
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.08); }
+}
+
+.genre-header-info { z-index: 1; }
+
+.genre-header-info h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, #fff, var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.genre-header-info p {
+    color: var(--text-grey);
+    font-size: 0.95rem;
+    max-width: 500px;
+}
+
+/* ── Seção de músicas ── */
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(124,77,255,0.4), transparent);
+}
+
+/* ── Grade de músicas ── */
+.musicas-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
 }
 
-/* Card de música */
-.musica {
-    background-color: var(--bg-card);
-    padding: 20px;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: background-color 0.3s;
-}
-
-.musica:hover { background-color: var(--bg-card-hover); }
-
-.musica h2 {
-    font-size: 1rem;
-    margin-bottom: 15px;
-    min-height: 40px;
-}
-
-/* Textarea de opinião */
-.musica label {
-    font-size: 0.85rem;
-    color: var(--text-grey);
-    margin-bottom: 8px;
-    display: block;
-}
-
-.musica textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
-    color: #fff;
-    padding: 8px;
-    resize: vertical;
-    outline: none;
-    font-size: 0.85rem;
-    min-height: 80px;
-}
-
-/* Sistema de estrelas */
-.star-rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-    gap: 5px;
-}
-
-.star-rating input { display: none; }
-
-.star-rating label {
-    font-size: 1.8rem;
-    color: #333;
+/* ── Card de música ── */
+.musica-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
-.star-rating label:hover,
-.star-rating label:hover ~ label,
-.star-rating input:checked ~ label {
-    color: var(--score-color);
+.musica-card:hover {
+    transform: translateY(-6px);
+    background: var(--bg-card-hover);
+    box-shadow: 0 12px 32px rgba(124,77,255,0.25);
+    border-color: rgba(124,77,255,0.3);
 }
 
-/* Botões de ação */
+/* Capa simulada com gradiente + nota musical */
+.musica-card-cover {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    position: relative;
+    overflow: hidden;
+}
+
+.musica-card-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 60% 40%, rgba(124,77,255,0.2), transparent 70%);
+}
+
+/* Botão play que aparece no hover */
+.musica-card-play {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 14px rgba(124,77,255,0.5);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.musica-card:hover .musica-card-play {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.musica-card-body {
+    padding: 14px;
+}
+
+.musica-card-body h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.musica-card-body p {
+    font-size: 0.8rem;
+    color: var(--text-grey);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Barra de progresso decorativa */
+.musica-card-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+}
+
+.musica-card-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 3px;
+    transition: width 0.6s ease;
+    width: 0%;
+}
+
+.musica-card:hover .musica-card-bar-fill {
+    width: 100%;
+}
+
+/* ── Vazio ── */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-grey);
+}
+
+.empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+/* ── Fade-in ── */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Botões de ação ── */
 .actions {
     grid-column: 1 / -1;
     margin-top: 30px;
@@ -147,23 +326,24 @@ fieldset {
 }
 
 .btn-acao {
-    padding: 12px 25px;
+    padding: 10px 22px;
     border-radius: 20px;
     border: none;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
     background: var(--bg-card-hover);
     color: white;
+    font-size: 0.85rem;
     transition: background 0.2s;
 }
 
 .btn-acao:hover { background: #333; }
 
 .btn-acao.primario {
-    background-color: var(--accent-green);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: white;
 }
 
-.btn-acao.primario:hover { background-color: #1aa34a; }
+.btn-acao.primario:hover { filter: brightness(1.12); }

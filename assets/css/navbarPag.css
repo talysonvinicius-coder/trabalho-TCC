@@ -1,0 +1,116 @@
+.sidebar-pag {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #000;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 50;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-pag-logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #7c4dff, #4fc3f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sidebar-pag nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-pag nav li {
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.sidebar-pag nav li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #b3b3b3;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.sidebar-pag nav li a i {
+    font-size: 1rem;
+    width: 18px;
+    text-align: center;
+}
+
+.sidebar-pag nav li a:hover {
+    color: #fff;
+    background: #1a1a1a;
+}
+
+.sidebar-pag nav li.active a {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(124,77,255,0.2), rgba(79,195,247,0.1));
+    border: 1px solid rgba(124,77,255,0.25);
+}
+
+.sidebar-pag nav li.active a i {
+    color: #7c4dff;
+}
+
+/* Banner premium */
+.sidebar-pag-premium {
+    margin-top: auto;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 1px solid rgba(124,77,255,0.2);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #b3b3b3;
+}
+
+.sidebar-pag-premium p {
+    margin: 8px 0 12px;
+    line-height: 1.4;
+}
+
+/* Botão sair */
+.sidebar-pag-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px;
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    color: #b3b3b3;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.sidebar-pag-logout:hover {
+    background: rgba(229,57,53,0.12);
+    border-color: rgba(229,57,53,0.35);
+    color: #ff6b6b;
+}
+
+.sidebar-pag-logout i { font-size: 0.9rem; }

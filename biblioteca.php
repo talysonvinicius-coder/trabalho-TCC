@@ -23,34 +23,17 @@ foreach ($musicas as $m) $contagem[$m['nota']]++;
     <title>SoundScore - Biblioteca</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/navbarPag.css">
     <link rel="stylesheet" href="assets/css/teste.css">
     <link rel="stylesheet" href="assets/css/biblioteca.css">
+    <style>
+        body { display: flex; height: 100vh; overflow: hidden; }
+        main.content { margin-left: 240px; width: calc(100% - 240px); overflow-y: auto; padding: 20px 32px 80px; }
+    </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="logo">🎶 SoundScore</div>
-        <nav>
-            <ul>
-                <li>
-                    <a href="paginicial.php">
-                        <i class="fas fa-home"></i> Início
-                    </a>
-                </li>
-                <li class="active">
-                    <i class="fas fa-book"></i> Sua Biblioteca
-                </li>
-                <li class="sidebar-profile">
-                    <i class="fas fa-user"></i> Ver Perfil
-                </li>
-            </ul>
-        </nav>
-        <div class="sidebar-premium-banner" style="margin-top:10px;">
-            <i class="fas fa-star mb-2" style="color:#ffc107;font-size:1.4rem"></i>
-            <p>Ouça sem limites com o <strong>Premium</strong></p>
-            <a href="premium.php" class="btn-premium-sidebar">Experimente grátis</a>
-        </div>
-    </aside>
+<?php include __DIR__ . '/navbarPag.php'; ?>
 
     <main class="content">
         <header class="top-bar">
