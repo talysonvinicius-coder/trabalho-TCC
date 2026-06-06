@@ -137,10 +137,11 @@
         </div>
 
         <div class="filtros">
-            <button class="btn-filtro ativo" onclick="filtrarDenuncias('pendentes', this)"><i class="fas fa-hourglass-half me-1"></i>Pendentes</button>
-            <button class="btn-filtro" onclick="filtrarDenuncias('aceitas', this)"><i class="fas fa-check me-1"></i>Aceitas</button>
-            <button class="btn-filtro" onclick="filtrarDenuncias('rejeitadas', this)"><i class="fas fa-times me-1"></i>Rejeitadas</button>
-            <button class="btn-filtro" onclick="filtrarDenuncias('todas', this)"><i class="fas fa-list me-1"></i>Todas</button>
+            <?php $filtroAtual = $_GET['filtro'] ?? 'pendentes'; ?>
+            <button class="btn-filtro <?php echo $filtroAtual === 'pendentes' ? 'ativo' : ''; ?>" onclick="filtrarDenuncias('pendentes', this)"><i class="fas fa-hourglass-half me-1"></i>Pendentes</button>
+            <button class="btn-filtro <?php echo $filtroAtual === 'aceitas' ? 'ativo' : ''; ?>" onclick="filtrarDenuncias('aceitas', this)"><i class="fas fa-check me-1"></i>Aceitas</button>
+            <button class="btn-filtro <?php echo $filtroAtual === 'rejeitadas' ? 'ativo' : ''; ?>" onclick="filtrarDenuncias('rejeitadas', this)"><i class="fas fa-times me-1"></i>Rejeitadas</button>
+            <button class="btn-filtro <?php echo $filtroAtual === 'todas' ? 'ativo' : ''; ?>" onclick="filtrarDenuncias('todas', this)"><i class="fas fa-list me-1"></i>Todas</button>
         </div>
 
         <div id="denuncias-list">
@@ -148,6 +149,20 @@
             require_once __DIR__ . '/model/dao/Conexao.php';
             try {
                 $pdo = Conexao::getConexao();
+
+                $filtro = $_GET['filtro'] ?? 'pendentes';
+                $whereClause = match($filtro) {
+                    'aceitas'    => "WHERE d.status = 'Resolvida'",
+                    'rejeitadas' => "WHERE d.status = 'Rejeitada'",
+                    'todas'      => '',
+                    default      => "WHERE d.status = 'Pendente'",
+                };
+                $statusBadgeClass = match($filtro) {
+                    'aceitas'    => 'status-aceita',
+                    'rejeitadas' => 'status-rejeitada',
+                    default      => 'status-pendente',
+                };
+
                 $query = "
                     SELECT d.id, d.motivo, d.status, d.data_denuncia,
                            c.conteudo, c.data_comentario,
@@ -160,7 +175,7 @@
                     INNER JOIN usuario u_comentario ON c.usuario_id = u_comentario.id
                     INNER JOIN login l ON u_comentario.id = l.usuario_id
                     INNER JOIN usuario u_denuncia ON d.usuario_id = u_denuncia.id
-                    WHERE d.status = 'Pendente'
+                    $whereClause
                     ORDER BY d.data_denuncia DESC
                 ";
                 $denuncias = $pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
@@ -169,12 +184,17 @@
                     foreach ($denuncias as $d):
                         $letra = strtoupper(mb_substr($d['usuario_comentario_nome'], 0, 1));
                         $dataFormatada = date('d/m/Y H:i', strtotime($d['data_denuncia']));
+                        $badgeClass = match($d['status']) {
+                            'Resolvida' => 'status-aceita',
+                            'Rejeitada' => 'status-rejeitada',
+                            default     => 'status-pendente',
+                        };
             ?>
             <div class="denuncia-card" data-status="<?php echo htmlspecialchars($d['status']); ?>">
                 <div class="denuncia-header">
                     <div class="d-flex align-items-center gap-2">
                         <span class="denuncia-id">#<?php echo $d['id']; ?></span>
-                        <span class="status-badge status-pendente">Pendente</span>
+                        <span class="status-badge <?php echo $badgeClass; ?>"><?php echo htmlspecialchars($d['status']); ?></span>
                     </div>
                     <span class="badge-motivo"><i class="fas fa-flag me-1"></i><?php echo htmlspecialchars($d['motivo'] ?? 'Sem motivo'); ?></span>
                 </div>

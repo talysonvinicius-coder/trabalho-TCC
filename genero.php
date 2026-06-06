@@ -17,7 +17,13 @@ if (!$genero_atual) {
     exit;
 }
 
-$stmt_musicas = $pdo->prepare("SELECT titulo, artista, album FROM musicas WHERE genero_id = :id");
+$stmt_musicas = $pdo->prepare("
+    SELECT m.titulo, a.nome AS artista, al.nome AS album
+    FROM musicas m
+    JOIN artista a ON m.artista_id = a.id
+    LEFT JOIN album al ON m.album_id = al.id
+    WHERE m.genero_id = :id
+");
 $stmt_musicas->execute(['id' => $id_genero]);
 $musicas = $stmt_musicas->fetchAll(PDO::FETCH_ASSOC);
 

@@ -36,8 +36,8 @@ try {
     $stmt = $pdo->prepare("DELETE FROM comentarios WHERE id = ?");
     $stmt->execute([$denuncia['comentario_id']]);
     
-    // Atualizar status da denúncia para 'Aceita'
-    $stmt = $pdo->prepare("UPDATE denuncias SET status = 'Aceita' WHERE id = ?");
+    // Atualizar status da denúncia para 'Resolvida'
+    $stmt = $pdo->prepare("UPDATE denuncias SET status = 'Resolvida' WHERE id = ?");
     $stmt->execute([$data['denuncia_id']]);
     
     $pdo->commit();
