@@ -1,6 +1,6 @@
 <?php
-require_once '../Model/dto/UsuarioDTO.php';
-require_once '../Model/dao/UsuarioDAO.php';
+require_once '../model/dto/UsuarioDTO.php';
+require_once '../model/dao/UsuarioDAO.php';
 
 $usuarioDAO = new UsuarioDAO();
 
@@ -14,12 +14,14 @@ if (isset($_POST['nome']) && isset($_POST['id'])) {
     $usuarioDTO->setEmail($_POST['email']);
     $usuarioDTO->setSenha($_POST['senha']);
 
-    // Lógica simples: Removemos o antigo e cadastramos o novo com os dados atualizados
-    // Já que o seu DAO possui os métodos excluirUsuario e cadastrarUsuario
-    $usuarioDAO->excluirUsuario($id);
-    $usuarioDAO->cadastrarUsuario($usuarioDTO);
+    // Atualiza nome, e-mail e senha sem apagar/recriar o registro
+    $resultado = $usuarioDAO->editarUsuario($id, $usuarioDTO);
 
-    header("Location: ../view/listarUsuarios.php");
+    if ($resultado) {
+        header("Location: ../view/listarUsuarios.php?sucesso=1");
+    } else {
+        header("Location: ../view/listarUsuarios.php?erro=" . urlencode('Erro ao salvar alterações'));
+    }
     exit();
 
 // PARTE 2: Exibir o formulário (Carregar dados)

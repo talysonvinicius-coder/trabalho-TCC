@@ -1,4 +1,13 @@
 <?php
+session_start();
+$listasUsuario = [];
+$isPremium = isset($_SESSION['plano_id']) && $_SESSION['plano_id'] == 2 && isset($_SESSION['id']);
+
+if ($isPremium) {
+    require_once 'model/dao/ListasDAO.php';
+    $listaDAO = new ListasDAO();
+    $listasUsuario = $listaDAO->listarPorUsuario($_SESSION['id']);
+}
 $musicas = [
     ['titulo' => 'Midnight City',   'artista' => 'M83',          'genero' => 'Eletrônica', 'nota' => 5, 'capa' => 'https://picsum.photos/seed/music1/200'],
     ['titulo' => 'Blinding Lights', 'artista' => 'The Weeknd',   'genero' => 'Pop',        'nota' => 4, 'capa' => 'https://picsum.photos/seed/music2/200'],
@@ -26,6 +35,7 @@ foreach ($musicas as $m) $contagem[$m['nota']]++;
     <link rel="stylesheet" href="assets/css/navbarPag.css">
     <link rel="stylesheet" href="assets/css/teste.css">
     <link rel="stylesheet" href="assets/css/biblioteca.css">
+    <link rel="stylesheet" href="assets/css/listas.css">
     <style>
         body { display: flex; height: 100vh; overflow: hidden; }
         main.content { margin-left: 240px; width: calc(100% - 240px); overflow-y: auto; padding: 20px 32px 80px; }
@@ -42,9 +52,68 @@ foreach ($musicas as $m) $contagem[$m['nota']]++;
                 <input type="text" placeholder="Buscar na biblioteca...">
             </div>
             <div class="user-controls">
+            <?php if (!$isPremium): ?>
                 <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php else: ?>
+                <span style="font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block;">
+                    <i class="fas fa-crown me-1"></i>Premium
+                </span>
+            <?php endif; ?>
             </div>
         </header>
+
+        <!-- Minhas Listas -->
+        <div class="container-listas mb-5" style="padding: 0;">
+            <header class="header-listas mb-3" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="section-title mb-0"><i class="fas fa-list me-2" style="color:#7c4dff;"></i>Minhas Listas</div>
+                <?php if ($isPremium && !empty($listasUsuario)): ?>
+                    <button onclick="abrirModalNovaLista()" class="btn flex-fill" style="background:linear-gradient(135deg,#7c4dff,#4fc3f7); color:#fff; border-radius:20px; font-weight:600; padding: 6px 16px; border:none; max-width: 150px;">+ Nova Lista</button>
+                <?php endif; ?>
+            </header>
+
+            <?php if ($isPremium): ?>
+                <div class="grid-letterboxd">
+                    <?php if (empty($listasUsuario)): ?>
+                        <div style="text-align: center; padding: 60px 20px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1); width: 100%; grid-column: 1 / -1;">
+                            <i class="fas fa-list-ul mb-3" style="font-size: 3rem; color: rgba(255,255,255,0.15);"></i>
+                            <h4 class="text-white" style="font-weight: 700;">Nenhuma lista encontrada</h4>
+                            <p class="text-muted mb-4">Você ainda não criou nenhuma playlist. Que tal começar agora?</p>
+                            <button onclick="abrirModalNovaLista()" class="btn" style="background:linear-gradient(135deg,#7c4dff,#4fc3f7); color:#fff; border-radius:20px; font-weight:600; padding: 8px 24px; border:none;">
+                                <i class="fas fa-plus me-2"></i>Criar Minha Primeira Lista
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach($listasUsuario as $lista): ?>
+                            <div class="card-lista">
+                                <a href="verLista.php?id=<?php echo $lista['id']; ?>" class="stack-capas">
+                                    <img src="https://picsum.photos/seed/<?php echo $lista['id']; ?>1/100" alt="capa1">
+                                    <img src="https://picsum.photos/seed/<?php echo $lista['id']; ?>2/100" alt="capa2">
+                                    <img src="https://picsum.photos/seed/<?php echo $lista['id']; ?>3/100" alt="capa3">
+                                </a>
+                                <div class="info-lista">
+                                    <h3><?php echo htmlspecialchars($lista['nome']); ?></h3>
+                                    <span class="badge-count"><?php echo $lista['total_musicas']; ?> músicas</span>
+                                    <div class="acoes-lista">
+                                        <button type="button" onclick="abrirModalEditar(<?php echo $lista['id']; ?>, '<?php echo addslashes(htmlspecialchars($lista['nome'])); ?>', '<?php echo addslashes(htmlspecialchars($lista['descricao'] ?? '')); ?>')" style="background: none; border: none; padding: 0; cursor: pointer; color: #b3b3b3;"><i class="fas fa-pen"></i></button>
+                                        <form action="controller/ExcluirListas.php" method="POST" onsubmit="return confirm('Tem certeza que deseja remover esta playlist?');" class="form-excluir">
+                                            <input type="hidden" name="id" value="<?php echo $lista['id']; ?>">
+                                            <button type="submit"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <div class="premium-locked-banner" style="text-align: center; padding: 40px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px dashed #ffc107;">
+                    <i class="fas fa-lock" style="font-size: 2.5rem; color: #ffc107; margin-bottom: 16px;"></i>
+                    <h4 style="color: #fff; font-weight: 700; margin-bottom: 10px;">Funcionalidade Exclusiva Premium</h4>
+                    <p style="color: #b3b3b3; margin-bottom: 20px; font-size: 0.9rem;">Crie, edite e organize suas próprias listas de músicas. Assine o plano Premium para liberar esta função!</p>
+                    <a href="premium.php" class="btn-upgrade" style="display: inline-block; padding: 8px 24px; background: #ffc107; color: #000; text-decoration: none; border-radius: 20px; font-weight: bold; transition: transform 0.2s;">Fazer Upgrade Agora</a>
+                </div>
+            <?php endif; ?>
+        </div>
 
         <!-- Painel de média de avaliações -->
         <div class="rating-panel mb-4">
@@ -98,8 +167,69 @@ foreach ($musicas as $m) $contagem[$m['nota']]++;
             <?php endforeach; ?>
         </div>
 
+        <div id="modal-add-lista" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: rgba(30,30,40,0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title">Adicionar à Lista</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="fecharModalAddLista()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="controller/AdicionarMusicaListaControl.php" method="POST">
+                            <input type="hidden" name="musica_id" id="add-musica-id">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Escolha a Playlist</label>
+                                <select name="lista_id" class="form-select" style="background: rgba(255,255,255,0.07); color: #fff; border: 1px solid rgba(255,255,255,0.15);" required>
+                                    <?php foreach($listasUsuario as $lst): ?>
+                                        <option value="<?php echo $lst['id']; ?>" style="color: #000;"><?php echo htmlspecialchars($lst['nome']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn flex-fill" style="background: #1db954; color: #fff; border-radius: 20px;">Adicionar</button>
+                                <button type="button" class="btn flex-fill" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 20px;" onclick="fecharModalAddLista()">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-lista" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: rgba(30,30,40,0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="modal-titulo">Nova Lista</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="fecharModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="controller/SalvarListas.php" method="POST">
+                            <input type="hidden" name="id" id="lista-id">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nome da Playlist</label>
+                                <input type="text" name="nome" id="lista-nome" class="form-control" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #fff;" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Descrição (opcional)</label>
+                                <textarea name="descricao" id="lista-descricao" class="form-control" rows="3" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #fff;"></textarea>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn flex-fill" style="background: #1db954; color: #fff; border-radius: 20px;">Salvar</button>
+                                <button type="button" class="btn flex-fill" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 20px;" onclick="fecharModal()">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/listas.js"></script>
 </body>
 </html>

@@ -20,21 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $usuarioDados = $usuarioDAO->buscarParaLogin($email);
 
-        // DEBUG - Salva em arquivo de log
-        $debug = "Email enviado: " . $email . "\n";
-        $debug .= "Senha enviada: " . $senha . "\n";
-        $debug .= "MD5 da senha: " . md5($senha) . "\n";
-        $debug .= "Dados do banco:\n";
-        $debug .= print_r($usuarioDados, true) . "\n";
-        $debug .= "Comparação: md5(senha) === banco_senha? " . (($usuarioDados && md5($senha) === $usuarioDados['senha']) ? 'SIM' : 'NÃO') . "\n";
-        
-        file_put_contents('../debug_login.txt', $debug);
-        echo "<pre>" . htmlspecialchars($debug) . "</pre>";
-
         if ($usuarioDados && md5($senha) === $usuarioDados['senha']) {
 
-            // Verifica status
-            if (!$usuarioDados['ativo']) {
+            // Verifica status (desativado pelo admin) e ativo (login bloqueado)
+            if (!$usuarioDados['ativo'] || !$usuarioDados['status']) {
                 header('Location: ../index.php?erro=3');
                 exit();
             }
@@ -42,8 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
 
             $_SESSION['logado']  = true;
-            $_SESSION['usuario'] = $usuarioDados['nome'];
+            $_SESSION['id']      = $usuarioDados['id'];
+            $_SESSION['nome']    = $usuarioDados['nome'];
             $_SESSION['perfil']  = $usuarioDados['perfil'];
+            $_SESSION['plano_id']= $usuarioDados['plano_id'];
 
             $destino = $usuarioDados['perfil'] === 'admin'
                 ? '../homeAdmin.php'

@@ -1,4 +1,5 @@
 <?php
+session_start();
 $id_genero = $_GET['id'] ?? null;
 
 if (!$id_genero) {
@@ -18,9 +19,9 @@ if (!$genero_atual) {
 }
 
 $stmt_musicas = $pdo->prepare("
-    SELECT m.titulo, a.nome AS artista, al.nome AS album, m.spotify_link
+    SELECT m.id, m.titulo, a.nome AS artista, al.nome AS album, m.spotify_link
     FROM musicas m
-    JOIN artista a ON m.artista_id = a.id
+    LEFT JOIN artista a ON m.artista_id = a.id
     LEFT JOIN album al ON m.album_id = al.id
     WHERE m.genero_id = :id
 ");
@@ -91,7 +92,7 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
 <?php include __DIR__ . '/navbarPag.php'; ?>
     <main class="content">
         <!-- Botão voltar -->
-        <a href="paginicial.php" class="btn-voltar fade-in">
+        <a href="javascript:history.back()" class="btn-voltar fade-in">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
 
@@ -113,7 +114,7 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
         <div class="musicas-grid fade-in">
             <?php if (count($musicas) > 0): ?>
                 <?php foreach ($musicas as $i => $musica): ?>
-                    <div class="musica-card" onclick="abrirAvaliar('<?php echo 'music' . ($i+1); ?>','<?php echo addslashes(htmlspecialchars($musica['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($musica['artista'])); ?>','<?php echo addslashes(htmlspecialchars($musica['spotify_link'] ?? '')); ?>')">
+                    <div class="musica-card" onclick="abrirAvaliar('<?php echo $musica['id']; ?>', '<?php echo 'music' . ($i+1); ?>','<?php echo addslashes(htmlspecialchars($musica['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($musica['artista'])); ?>','<?php echo addslashes(htmlspecialchars($musica['spotify_link'] ?? '')); ?>')">
                         <div class="musica-card-cover">
                             <?php echo $notas[$i % count($notas)]; ?>
                         </div>
@@ -149,13 +150,25 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
                 <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding:20px;">
-                <!-- Player YouTube -->
-                <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
-                    <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                </div>
-                <div id="yt-no-video" class="yt-no-video" style="display:none;">
-                    <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
-                </div>
+                <!-- Player YouTube ou Premium Lock -->
+                <?php if (!$isPremium): ?>
+                    <div class="premium-locked-banner" style="text-align: center; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px dashed #ffc107; margin-bottom: 16px;">
+                        <i class="fas fa-lock" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 10px;"></i>
+                        <h6 style="color: #fff; font-weight: 700; margin-bottom: 5px;">Funcionalidade Premium</h6>
+                        <p style="color: #b3b3b3; margin-bottom: 15px; font-size: 0.8rem;">Ouvir as músicas requer uma assinatura Premium.</p>
+                        <a href="premium.php" class="btn-upgrade" style="display: inline-block; padding: 6px 16px; background: #ffc107; color: #000; text-decoration: none; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">Fazer Upgrade</a>
+                    </div>
+                <?php else: ?>
+                    <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
+                        <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                    </div>
+                    <div id="yt-no-video" class="yt-no-video" style="display:none;">
+                        <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
+                    </div>
+                <?php endif; ?>
+                <!-- Avaliação JS data -->
+                <input type="hidden" id="av-musica-id" value="">
+                
                 <!-- Estrelas -->
                 <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Sua nota</p>
                 <div class="star-rating mb-3" id="stars">
@@ -168,8 +181,9 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
                 <!-- Comentário -->
                 <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
                 <textarea id="av-comentario" class="comentario-textarea" rows="3"
-                    placeholder="Ex: Uma das melhores músicas dos anos 90, marcante e poderosa..."></textarea>
-                <button class="btn-avaliar-enviar mt-3" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+                    placeholder="Ex: Uma das melhores músicas..."></textarea>
+                <button class="btn-avaliar-enviar mt-3" id="btn-enviar-av" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+                <div id="av-msg" class="mt-2 text-center" style="font-size:0.85rem; display:none;"></div>
             </div>
         </div>
     </div>
@@ -197,11 +211,13 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
             });
         });
 
-        function abrirAvaliar(seed, titulo, artista, youtubeUrl) {
+        function abrirAvaliar(musicaId, seed, titulo, artista, youtubeUrl) {
+            document.getElementById('av-musica-id').value = musicaId;
             document.getElementById('av-capa').src = 'https://picsum.photos/seed/' + seed + '/200';
             document.getElementById('av-titulo').textContent = titulo;
             document.getElementById('av-artista').textContent = artista;
             document.getElementById('av-comentario').value = '';
+            document.getElementById('av-msg').style.display = 'none';
             document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
 
             const videoId = extrairVideoId(youtubeUrl);
@@ -209,14 +225,16 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
             const noVideo    = document.getElementById('yt-no-video');
             const iframe     = document.getElementById('yt-iframe');
 
-            if (videoId) {
-                iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-                playerWrap.style.display = 'block';
-                noVideo.style.display    = 'none';
-            } else {
-                iframe.src = '';
-                playerWrap.style.display = 'none';
-                noVideo.style.display    = 'block';
+            if (playerWrap && noVideo && iframe) {
+                if (videoId) {
+                    iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+                    playerWrap.style.display = 'block';
+                    noVideo.style.display    = 'none';
+                } else {
+                    iframe.src = '';
+                    playerWrap.style.display = 'none';
+                    noVideo.style.display    = 'block';
+                }
             }
 
             new bootstrap.Modal(document.getElementById('modalAvaliar')).show();
@@ -224,11 +242,66 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
 
         // Para o vídeo ao fechar o modal
         document.getElementById('modalAvaliar').addEventListener('hide.bs.modal', function() {
-            document.getElementById('yt-iframe').src = '';
+            const iframe = document.getElementById('yt-iframe');
+            if (iframe) iframe.src = '';
         });
 
-        function enviarAvaliacao() {
-            bootstrap.Modal.getInstance(document.getElementById('modalAvaliar')).hide();
+        async function enviarAvaliacao() {
+            const musicaId = document.getElementById('av-musica-id').value;
+            const comentario = document.getElementById('av-comentario').value;
+            
+            // Conta estrelas
+            let nota = 0;
+            document.querySelectorAll('#stars span.active').forEach(s => {
+                const val = parseInt(s.dataset.v);
+                if (val > nota) nota = val;
+            });
+
+            if (nota === 0) {
+                const msg = document.getElementById('av-msg');
+                msg.style.display = 'block';
+                msg.style.color = '#ff6b6b';
+                msg.textContent = 'Por favor, selecione uma nota.';
+                return;
+            }
+
+            const btn = document.getElementById('btn-enviar-av');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+
+            const fd = new FormData();
+            fd.append('musica_id', musicaId);
+            fd.append('nota', nota);
+            fd.append('comentario', comentario);
+
+            try {
+                const res = await fetch('api/avaliacoes/avaliar.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                const msg = document.getElementById('av-msg');
+                msg.style.display = 'block';
+                if (data.ok) {
+                    msg.style.color = '#1db954';
+                    msg.textContent = 'Avaliação salva com sucesso!';
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAvaliar')).hide();
+                        btn.disabled = false;
+                        btn.innerHTML = 'Enviar Avaliação';
+                    }, 1500);
+                } else {
+                    msg.style.color = '#ff6b6b';
+                    msg.textContent = data.erro || 'Erro ao salvar.';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar Avaliação';
+                }
+            } catch(e) {
+                const msg = document.getElementById('av-msg');
+                msg.style.display = 'block';
+                msg.style.color = '#ff6b6b';
+                msg.textContent = 'Erro de conexão.';
+                btn.disabled = false;
+                btn.innerHTML = 'Enviar Avaliação';
+            }
         }
     </script>
 </body>

@@ -31,10 +31,11 @@ if (!$usuario['ativo'] || !$usuario['status']) {
 }
 
 session_regenerate_id(true);
-$_SESSION['logado']  = true;
-$_SESSION['id']      = $usuario['id'];
-$_SESSION['nome']    = $usuario['nome'];
-$_SESSION['perfil']  = $usuario['perfil'];
+$_SESSION['logado']   = true;
+$_SESSION['id']       = $usuario['id'];
+$_SESSION['nome']     = $usuario['nome'];
+$_SESSION['perfil']   = $usuario['perfil'];
+$_SESSION['plano_id'] = (int)($usuario['plano_id'] ?? 1);
 
 echo json_encode(['ok' => true, 'perfil' => $usuario['perfil']]);
 ?>

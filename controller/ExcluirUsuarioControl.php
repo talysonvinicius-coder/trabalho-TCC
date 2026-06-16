@@ -1,6 +1,12 @@
 <?php
+session_start();
+
+if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
+    header("Location: ../login.html");
+    exit;
+}
 // Controller responsável por processar a exclusão
-require_once '../Model/dao/UsuarioDAO.php';
+require_once '../model/dao/UsuarioDAO.php';
 // Verifica se o ID foi enviado através do método POST
 if (isset($_POST['id'])) {
  $id = $_POST['id'];

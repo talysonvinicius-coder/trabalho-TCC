@@ -1,4 +1,5 @@
 <?php
+session_start();
 $musica_nova  = null;
 $todas_musicas = [];
 try {
@@ -262,7 +263,13 @@ function ytThumb($url) {
             <input type="text" placeholder="O que você quer ouvir?" id="search-input">
         </div>
         <div class="user-controls">
-            <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php if (!$isPremium): ?>
+                <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php else: ?>
+                <span style="font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block;">
+                    <i class="fas fa-crown me-1"></i>Premium
+                </span>
+            <?php endif; ?>
             <a href="homeAdmin.php" id="btn-admin" style="display:none; background:linear-gradient(135deg,#7c4dff,#4fc3f7); border:none; color:#fff; font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; text-decoration:none; transition:filter 0.2s;"><i class="fas fa-shield-alt me-1"></i>Ir para a Administração</a>
         </div>
     </header>
@@ -355,7 +362,7 @@ function ytThumb($url) {
                 $emoji = $notas_emoji[$i % count($notas_emoji)];
             ?>
             <div style="min-width:160px;max-width:160px;">
-                <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                <div class="music-card" onclick="abrirAvaliar('<?php echo $m['id']; ?>', 'banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>', '<?php echo addslashes(htmlspecialchars($m['spotify_link'] ?? '')); ?>')">
                     <?php if ($thumb): ?>
                         <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
                     <?php else: ?>
@@ -510,7 +517,7 @@ function ytThumb($url) {
                         $emoji = $notas_emoji[$i % count($notas_emoji)];
                     ?>
                     <div class="col">
-                        <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                        <div class="music-card" onclick="abrirAvaliar('<?php echo $m['id']; ?>', 'banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>', '<?php echo addslashes(htmlspecialchars($m['spotify_link'] ?? '')); ?>')">
                             <?php if ($thumb): ?>
                                 <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
                             <?php else: ?>
@@ -543,6 +550,23 @@ function ytThumb($url) {
                 <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding:20px;">
+                <!-- Player YouTube ou Premium Lock -->
+                <?php if (!$isPremium): ?>
+                    <div class="premium-locked-banner" style="text-align: center; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px dashed #ffc107; margin-bottom: 16px;">
+                        <i class="fas fa-lock" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 10px;"></i>
+                        <h6 style="color: #fff; font-weight: 700; margin-bottom: 5px;">Funcionalidade Premium</h6>
+                        <p style="color: #b3b3b3; margin-bottom: 15px; font-size: 0.8rem;">Ouvir as músicas requer uma assinatura Premium.</p>
+                        <a href="premium.php" class="btn-upgrade" style="display: inline-block; padding: 6px 16px; background: #ffc107; color: #000; text-decoration: none; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">Fazer Upgrade</a>
+                    </div>
+                <?php else: ?>
+                    <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
+                        <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                    </div>
+                    <div id="yt-no-video" class="yt-no-video" style="display:none;">
+                        <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
+                    </div>
+                <?php endif; ?>
+
                 <!-- Estrelas -->
                 <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Sua nota</p>
                 <div class="star-rating mb-3" id="stars">
@@ -552,11 +576,15 @@ function ytThumb($url) {
                     <span data-v="4">&#9733;</span>
                     <span data-v="5">&#9733;</span>
                 </div>
+                <!-- Avaliação JS data -->
+                <input type="hidden" id="av-musica-id" value="">
+                
                 <!-- Comentário -->
                 <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
                 <textarea id="av-comentario" class="comentario-textarea" rows="3"
                     placeholder="Ex: Uma das melhores músicas dos anos 90, marcante e poderosa..."></textarea>
-                <button class="btn-avaliar-enviar mt-3" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+                <button class="btn-avaliar-enviar mt-3" id="btn-enviar-av" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+                <div id="av-msg" class="mt-2 text-center" style="font-size:0.85rem; display:none;"></div>
             </div>
         </div>
     </div>
@@ -705,16 +733,101 @@ function ytThumb($url) {
         ).join('');
         new bootstrap.Modal(document.getElementById('modalArtista')).show();
     }
-    function abrirAvaliar(seed, titulo, artista) {
+    function extrairVideoId(url) {
+        if (!url) return null;
+        const m = url.match(/(?:youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    function abrirAvaliar(musicaId, seed, titulo, artista, youtubeUrl) {
+        document.getElementById('av-musica-id').value = musicaId;
         document.getElementById('av-capa').src = 'https://picsum.photos/seed/' + seed + '/200';
         document.getElementById('av-titulo').textContent = titulo;
         document.getElementById('av-artista').textContent = artista;
         document.getElementById('av-comentario').value = '';
+        document.getElementById('av-msg').style.display = 'none';
         document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
+
+        const videoId = extrairVideoId(youtubeUrl);
+        const playerWrap = document.getElementById('yt-player-wrap');
+        const noVideo    = document.getElementById('yt-no-video');
+        const iframe     = document.getElementById('yt-iframe');
+
+        if (playerWrap && noVideo && iframe) {
+            if (videoId) {
+                iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+                playerWrap.style.display = 'block';
+                noVideo.style.display    = 'none';
+            } else {
+                iframe.src = '';
+                playerWrap.style.display = 'none';
+                noVideo.style.display    = 'block';
+            }
+        }
+
         new bootstrap.Modal(document.getElementById('modalAvaliar')).show();
     }
-    function enviarAvaliacao() {
-        bootstrap.Modal.getInstance(document.getElementById('modalAvaliar')).hide();
+
+    // Para o vídeo ao fechar o modal
+    document.getElementById('modalAvaliar').addEventListener('hide.bs.modal', function() {
+        const iframe = document.getElementById('yt-iframe');
+        if (iframe) iframe.src = '';
+    });
+    async function enviarAvaliacao() {
+        const musicaId = document.getElementById('av-musica-id').value;
+        const comentario = document.getElementById('av-comentario').value;
+        
+        let nota = 0;
+        document.querySelectorAll('#stars span.active').forEach(s => {
+            const val = parseInt(s.dataset.v);
+            if (val > nota) nota = val;
+        });
+
+        if (nota === 0) {
+            const msg = document.getElementById('av-msg');
+            msg.style.display = 'block';
+            msg.style.color = '#ff6b6b';
+            msg.textContent = 'Por favor, selecione uma nota.';
+            return;
+        }
+
+        const btn = document.getElementById('btn-enviar-av');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+
+        const fd = new FormData();
+        fd.append('musica_id', musicaId);
+        fd.append('nota', nota);
+        fd.append('comentario', comentario);
+
+        try {
+            const res = await fetch('api/avaliacoes/avaliar.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            
+            const msg = document.getElementById('av-msg');
+            msg.style.display = 'block';
+            if (data.ok) {
+                msg.style.color = '#1db954';
+                msg.textContent = 'Avaliação salva com sucesso!';
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('modalAvaliar')).hide();
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enviar Avaliação';
+                }, 1500);
+            } else {
+                msg.style.color = '#ff6b6b';
+                msg.textContent = data.erro || 'Erro ao salvar.';
+                btn.disabled = false;
+                btn.innerHTML = 'Enviar Avaliação';
+            }
+        } catch(e) {
+            const msg = document.getElementById('av-msg');
+            msg.style.display = 'block';
+            msg.style.color = '#ff6b6b';
+            msg.textContent = 'Erro de conexão.';
+            btn.disabled = false;
+            btn.innerHTML = 'Enviar Avaliação';
+        }
     }
 </script>
 </body>

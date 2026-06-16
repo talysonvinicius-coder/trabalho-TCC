@@ -11,7 +11,7 @@ async function verificarSessao(exigeAdmin = false) {
         }
 
         if (exigeAdmin && dados.perfil !== 'admin') {
-            window.location.href = 'homeAdmin.php';
+            window.location.href = 'paginicial.php';
             return null;
         }
 
