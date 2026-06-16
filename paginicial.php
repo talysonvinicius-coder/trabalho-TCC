@@ -1,11 +1,42 @@
 <?php
+$musica_nova  = null;
+$todas_musicas = [];
 try {
     $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
+
     $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
     $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Busca todas as músicas ordenadas da mais recente para a mais antiga
+    $stmt_todas = $pdo->query("
+        SELECT m.id, m.titulo, m.spotify_link,
+               COALESCE(a.nome, 'Artista desconhecido') AS artista,
+               al.nome AS album
+        FROM musicas m
+        LEFT JOIN artista a ON m.artista_id = a.id
+        LEFT JOIN album al ON m.album_id = al.id
+        ORDER BY m.id DESC
+    ");
+    $todas_musicas = $stmt_todas->fetchAll(PDO::FETCH_ASSOC);
+    $musica_nova   = $todas_musicas[0] ?? null;
 } catch (PDOException $e) {
     $generos = [];
     error_log($e->getMessage());
+}
+
+$notas_emoji = ['🎵','🎶','🎼','🎹','🥁','🎸','🎷','🎺','🎻','🪗'];
+
+// Extrai o videoId de qualquer formato de URL do YouTube
+function ytVideoId($url) {
+    if (!$url) return null;
+    preg_match('/(?:youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/', $url, $m);
+    return $m[1] ?? null;
+}
+
+// Retorna a thumbnail do YouTube ou null
+function ytThumb($url) {
+    $id = ytVideoId($url);
+    return $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
 }
 ?>
 <!DOCTYPE html>
@@ -276,66 +307,71 @@ try {
         </div>
     </section>
 
-    <!-- Avaliadas recentemente -->
+    <!-- Adicionadas recentemente -->
     <section class="mb-5 fade-in">
         <div class="section-header">
-            <h2>Avaliadas recentemente</h2>
+            <h2>Adicionadas recentemente</h2>
             <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalAvaliadasRecente">Ver tudo</a>
         </div>
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
             <?php
-            $musicas = [
-                ['seed' => 'music1', 'titulo' => 'Midnight City',   'artista' => 'M83',         'score' => '9.8'],
-                ['seed' => 'music2', 'titulo' => 'Blinding Lights', 'artista' => 'The Weeknd',  'score' => '9.5'],
-                ['seed' => 'music3', 'titulo' => 'Breathe Deeper',  'artista' => 'Tame Impala', 'score' => '9.2'],
-                ['seed' => 'music4', 'titulo' => 'Levitating',      'artista' => 'Dua Lipa',    'score' => '9.0'],
-            ];
-            foreach ($musicas as $m): ?>
+            $recentes = array_slice($todas_musicas, 0, 4);
+            foreach ($recentes as $i => $m):
+                $thumb = ytThumb($m['spotify_link']);
+                $emoji = $notas_emoji[$i % count($notas_emoji)];
+            ?>
             <div class="col">
                 <div class="music-card">
-                    <img src="https://picsum.photos/seed/<?php echo $m['seed']; ?>/200" alt="<?php echo $m['titulo']; ?>">
+                    <?php if ($thumb): ?>
+                        <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                    <?php else: ?>
+                        <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3.5rem;"><?php echo $emoji; ?></div>
+                    <?php endif; ?>
                     <button class="play-overlay"><i class="fas fa-play"></i></button>
                     <div class="card-body">
-                        <h4><?php echo $m['titulo']; ?></h4>
-                        <p><?php echo $m['artista']; ?> • <span class="score-badge"><?php echo $m['score']; ?></span></p>
+                        <?php if ($i === 0): ?>
+                        <span style="font-size:0.65rem;font-weight:700;background:linear-gradient(135deg,#7c4dff,#4fc3f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;letter-spacing:1px;">✦ Nova</span>
+                        <?php endif; ?>
+                        <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                        <p><?php echo htmlspecialchars($m['artista']); ?><?php echo !empty($m['album']) ? ' • ' . htmlspecialchars($m['album']) : ''; ?></p>
                     </div>
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($recentes)): ?>
+                <p class="text-muted">Nenhuma música cadastrada.</p>
+            <?php endif; ?>
         </div>
     </section>
-    <!-- Recomendação de avaliações -->
+    <!-- Recomendações Para Você -->
     <section class="mb-5 fade-in">
         <div class="section-header">
             <h2>Recomendações Para Você</h2>
             <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalRecomendacoes">Ver tudo</a>
         </div>
         <div class="d-flex flex-nowrap gap-3 overflow-auto pb-2" style="scrollbar-width:thin;scrollbar-color:#7c4dff transparent;">
-            <?php
-            $musicas = [
-                ['seed' => 'music1', 'titulo' => 'Bohemian Rhapsody ',   'artista' => 'Queen',         'score' => '9.8'],
-                ['seed' => 'music2', 'titulo' => 'Imagine', 'artista' => 'John Lennon ',  'score' => '9.5'],
-                ['seed' => 'music3', 'titulo' => 'Billie Jean ',  'artista' => ' Michael Jackson', 'score' => '9.2'],
-                ['seed' => 'music4', 'titulo' => 'Smells Like Teen Spirit ',      'artista' => 'Nirvana',    'score' => '9.5'],
-                ['seed' => 'music5', 'titulo' => 'Hotel California ',      'artista' => 'Eagles',    'score' => '6.5'],
-                ['seed' => 'music6', 'titulo' => 'Shape of You',      'artista' => 'Ed Sheeran',    'score' => '6.7'],
-                ['seed' => 'music7', 'titulo' => 'Rolling in the Deep ',      'artista' => 'Adele',    'score' => '8.9'],
-                ['seed' => 'music8', 'titulo' => 'Hey Jude ',      'artista' => 'The Beatles',    'score' => '9.9'],
-                ['seed' => 'music9', 'titulo' => 'Like a Prayer',      'artista' => 'Madonna',    'score' => '8.3'],
-                ['seed' => 'music10', 'titulo' => 'Madonna',      'artista' => 'Oasis',    'score' => ''],
-            ];
-            foreach ($musicas as $m): ?>
+            <?php foreach ($todas_musicas as $i => $m):
+                $thumb = ytThumb($m['spotify_link']);
+                $emoji = $notas_emoji[$i % count($notas_emoji)];
+            ?>
             <div style="min-width:160px;max-width:160px;">
-                <div class="music-card" onclick="abrirAvaliar('<?php echo $m['seed']; ?>','<?php echo addslashes(trim($m['titulo'])); ?>','<?php echo addslashes(trim($m['artista'])); ?>')">
-                    <img src="https://picsum.photos/seed/<?php echo $m['seed']; ?>/200" alt="<?php echo $m['titulo']; ?>">
+                <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                    <?php if ($thumb): ?>
+                        <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                    <?php else: ?>
+                        <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:2.5rem;"><?php echo $emoji; ?></div>
+                    <?php endif; ?>
                     <button class="play-overlay"><i class="fas fa-play"></i></button>
                     <div class="card-body">
-                        <h4><?php echo $m['titulo']; ?></h4>
-                        <p><?php echo $m['artista']; ?> • <span class="score-badge"><?php echo $m['score']; ?></span></p>
+                        <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                        <p><?php echo htmlspecialchars($m['artista']); ?></p>
                     </div>
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($todas_musicas)): ?>
+                <p class="text-muted">Nenhuma música cadastrada.</p>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -421,31 +457,34 @@ try {
     </div>
 </div>
 
-<!-- Modal Ver Tudo - Avaliadas Recentemente -->
+<!-- Modal Ver Tudo - Adicionadas Recentemente -->
 <div class="modal fade" id="modalAvaliadasRecente" tabindex="-1">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content" style="background:#0a0a0a; color:#fff;">
             <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title fw-bold"><i class="fas fa-clock me-2" style="color:#7c4dff;"></i>Avaliadas Recentemente</h5>
+                <h5 class="modal-title fw-bold"><i class="fas fa-clock me-2" style="color:#7c4dff;"></i>Adicionadas Recentemente</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="overflow-y:auto;">
                 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
-                    <?php
-                    $avaliadasAll = [
-                        ['seed' => 'music1', 'titulo' => 'Midnight City',   'artista' => 'M83',         'score' => '9.8'],
-                        ['seed' => 'music2', 'titulo' => 'Blinding Lights', 'artista' => 'The Weeknd',  'score' => '9.5'],
-                        ['seed' => 'music3', 'titulo' => 'Breathe Deeper',  'artista' => 'Tame Impala', 'score' => '9.2'],
-                        ['seed' => 'music4', 'titulo' => 'Levitating',      'artista' => 'Dua Lipa',    'score' => '9.0'],
-                    ];
-                    foreach ($avaliadasAll as $m): ?>
+                    <?php foreach ($todas_musicas as $i => $m):
+                        $thumb = ytThumb($m['spotify_link']);
+                        $emoji = $notas_emoji[$i % count($notas_emoji)];
+                    ?>
                     <div class="col">
                         <div class="music-card">
-                            <img src="https://picsum.photos/seed/<?php echo $m['seed']; ?>/200" alt="<?php echo $m['titulo']; ?>">
+                            <?php if ($thumb): ?>
+                                <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                            <?php else: ?>
+                                <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
+                            <?php endif; ?>
                             <button class="play-overlay"><i class="fas fa-play"></i></button>
                             <div class="card-body">
-                                <h4><?php echo $m['titulo']; ?></h4>
-                                <p><?php echo $m['artista']; ?> &bull; <span class="score-badge"><?php echo $m['score']; ?></span></p>
+                                <?php if ($i === 0): ?>
+                                <span style="font-size:0.62rem;font-weight:700;background:linear-gradient(135deg,#7c4dff,#4fc3f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;letter-spacing:1px;">✦ Nova</span>
+                                <?php endif; ?>
+                                <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                                <p><?php echo htmlspecialchars($m['artista']); ?><?php echo !empty($m['album']) ? ' &bull; ' . htmlspecialchars($m['album']) : ''; ?></p>
                             </div>
                         </div>
                     </div>
@@ -466,27 +505,21 @@ try {
             </div>
             <div class="modal-body" style="overflow-y:auto;">
                 <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
-                    <?php
-                    $musicasAll = [
-                        ['seed' => 'music1',  'titulo' => 'Bohemian Rhapsody',      'artista' => 'Queen',            'score' => '9.8'],
-                        ['seed' => 'music2',  'titulo' => 'Imagine',                'artista' => 'John Lennon',       'score' => '9.5'],
-                        ['seed' => 'music3',  'titulo' => 'Billie Jean',             'artista' => 'Michael Jackson',  'score' => '9.2'],
-                        ['seed' => 'music4',  'titulo' => 'Smells Like Teen Spirit', 'artista' => 'Nirvana',          'score' => '9.5'],
-                        ['seed' => 'music5',  'titulo' => 'Hotel California',        'artista' => 'Eagles',           'score' => '6.5'],
-                        ['seed' => 'music6',  'titulo' => 'Shape of You',            'artista' => 'Ed Sheeran',       'score' => '6.7'],
-                        ['seed' => 'music7',  'titulo' => 'Rolling in the Deep',     'artista' => 'Adele',            'score' => '8.9'],
-                        ['seed' => 'music8',  'titulo' => 'Hey Jude',                'artista' => 'The Beatles',      'score' => '9.9'],
-                        ['seed' => 'music9',  'titulo' => 'Like a Prayer',           'artista' => 'Madonna',          'score' => '8.3'],
-                        ['seed' => 'music10', 'titulo' => 'Wonderwall',              'artista' => 'Oasis',            'score' => '8.0'],
-                    ];
-                    foreach ($musicasAll as $m): ?>
+                    <?php foreach ($todas_musicas as $i => $m):
+                        $thumb = ytThumb($m['spotify_link']);
+                        $emoji = $notas_emoji[$i % count($notas_emoji)];
+                    ?>
                     <div class="col">
-                        <div class="music-card">
-                            <img src="https://picsum.photos/seed/<?php echo $m['seed']; ?>/200" alt="<?php echo $m['titulo']; ?>">
+                        <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                            <?php if ($thumb): ?>
+                                <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                            <?php else: ?>
+                                <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
+                            <?php endif; ?>
                             <button class="play-overlay"><i class="fas fa-play"></i></button>
                             <div class="card-body">
-                                <h4><?php echo $m['titulo']; ?></h4>
-                                <p><?php echo $m['artista']; ?> • <span class="score-badge"><?php echo $m['score']; ?></span></p>
+                                <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                                <p><?php echo htmlspecialchars($m['artista']); ?></p>
                             </div>
                         </div>
                     </div>
