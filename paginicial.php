@@ -180,8 +180,8 @@ try {
         .fade-in.visible { opacity: 1; transform: translateY(0); }
 
         /* Footer slideshow */
-        .player { padding: 0; overflow: hidden; height: 50px; position: fixed; bottom: 0; left: 240px; width: calc(100% - 240px); z-index: 40; }
-        .player img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 1s ease; }
+        .player { padding: 0; overflow: hidden; height: 50px; position: fixed; bottom: 0; left: 240px; width: calc(100% - 240px); z-index: 40; background: #000; }
+        .player img { width: 100%; height: 100%; object-fit: fill; display: block; transition: opacity 1s ease; }
 
         /* Sidebar premium banner */
         .sidebar-premium-banner { margin-top: 10px; }
@@ -354,7 +354,7 @@ try {
             ];
             foreach ($artistas as $a): ?>
             <div class="col">
-                <div class="artist-card">
+                <div class="artist-card" onclick="abrirArtista('<?php echo $a['seed']; ?>','<?php echo addslashes($a['nome']); ?>')">
                     <img src="https://picsum.photos/seed/<?php echo $a['seed']; ?>/200" alt="<?php echo $a['nome']; ?>">
                     <h4><?php echo $a['nome']; ?></h4>
                     <p><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
@@ -364,6 +364,31 @@ try {
         </div>
     </section>
 </main>
+
+<!-- Modal Artista -->
+<div class="modal fade" id="modalArtista" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+        <div class="modal-content" style="background:rgba(15,15,25,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:#fff;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0 px-4 pb-4">
+                <!-- Foto centralizada -->
+                <div class="text-center mb-3">
+                    <img id="art-foto" src="" alt="" style="width:180px;height:180px;border-radius:12px;object-fit:cover;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+                    <h4 id="art-nome" class="mt-3 mb-0 fw-bold"></h4>
+                    <p style="font-size:0.78rem;color:#b3b3b3;"><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
+                </div>
+                <!-- Músicas -->
+                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Músicas populares</p>
+                <div id="art-musicas" class="mb-4"></div>
+                <!-- Álbuns -->
+                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Álbuns</p>
+                <div id="art-albuns" class="d-flex gap-3 flex-wrap"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Ver Tudo - Artistas Recomendados -->
 <div class="modal fade" id="modalArtistas" tabindex="-1">
@@ -494,24 +519,6 @@ try {
                     <span data-v="4">&#9733;</span>
                     <span data-v="5">&#9733;</span>
                 </div>
-                <!-- Slider -->
-                <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Como você se sentiu?</p>
-                <input type="range" min="0" max="100" value="50" class="mood-slider" id="mood-slider">
-                <div class="mood-labels">
-                    <span>&#128557; Não gostei</span>
-                    <span id="mood-label">Neutro</span>
-                    <span>&#10084;&#65039; Amei</span>
-                </div>
-                <!-- Chips -->
-                <p class="mt-3 mb-2" style="font-size:0.8rem;color:#b3b3b3;">Feedback rápido</p>
-                <div class="feedback-chips mb-3">
-                    <span class="chip" onclick="toggleChip(this)">&#127926; Ótima batida</span>
-                    <span class="chip" onclick="toggleChip(this)">&#127908; Letra incrível</span>
-                    <span class="chip" onclick="toggleChip(this)">&#128165; Muito intensa</span>
-                    <span class="chip" onclick="toggleChip(this)">&#128564; Relaxante</span>
-                    <span class="chip" onclick="toggleChip(this)">&#128293; Favorita</span>
-                    <span class="chip" onclick="toggleChip(this)">&#127928; Prod. incrível</span>
-                </div>
                 <!-- Comentário -->
                 <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
                 <textarea id="av-comentario" class="comentario-textarea" rows="3"
@@ -624,11 +631,6 @@ try {
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
     // Modal Avaliação
-    const moodLabels = ['Não gostei', 'Não curti muito', 'Neutro', 'Gostei', 'Adorei', 'Amei!'];
-    document.getElementById('mood-slider').addEventListener('input', function() {
-        const idx = Math.round(this.value / 20);
-        document.getElementById('mood-label').textContent = moodLabels[idx];
-    });
     document.querySelectorAll('#stars span').forEach(star => {
         star.addEventListener('click', function() {
             const val = +this.dataset.v;
@@ -636,15 +638,46 @@ try {
         });
     });
     function toggleChip(el) { el.classList.toggle('selected'); }
+
+    const artistaData = {
+        'art1': {
+            musicas: ['Blinding Lights','Starboy','Save Your Tears','Die For You','The Hills'],
+            albuns:  [{seed:'alb1',nome:'After Hours'},{seed:'alb2',nome:'Starboy'},{seed:'alb3',nome:'Kiss Land'}]
+        },
+        'art2': {
+            musicas: ['The Less I Know The Better','Feels Like We Only Go Backwards','Let It Happen','Eventually','New Person'],
+            albuns:  [{seed:'alb4',nome:'Currents'},{seed:'alb5',nome:'Lonerism'},{seed:'alb6',nome:'Innerspeaker'}]
+        },
+        'art3': {
+            musicas: ['Levitating','Don\'t Start Now','Physical','Break My Heart','New Rules'],
+            albuns:  [{seed:'alb7',nome:'Future Nostalgia'},{seed:'alb8',nome:'Radical Optimism'},{seed:'alb9',nome:'Dua Lipa'}]
+        }
+    };
+    function abrirArtista(seed, nome) {
+        const d = artistaData[seed] || { musicas: [], albuns: [] };
+        document.getElementById('art-foto').src = 'https://picsum.photos/seed/' + seed + '/200';
+        document.getElementById('art-nome').textContent = nome;
+        document.getElementById('art-musicas').innerHTML = d.musicas.map((m, i) =>
+            `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <span style="color:#b3b3b3;font-size:0.8rem;width:16px;text-align:right;">${i+1}</span>
+                <i class="fas fa-music" style="color:#7c4dff;font-size:0.75rem;"></i>
+                <span style="font-size:0.88rem;">${m}</span>
+            </div>`
+        ).join('');
+        document.getElementById('art-albuns').innerHTML = d.albuns.map(a =>
+            `<div style="text-align:center;width:90px;">
+                <img src="https://picsum.photos/seed/${a.seed}/200" style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-bottom:6px;">
+                <p style="font-size:0.72rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.nome}</p>
+            </div>`
+        ).join('');
+        new bootstrap.Modal(document.getElementById('modalArtista')).show();
+    }
     function abrirAvaliar(seed, titulo, artista) {
         document.getElementById('av-capa').src = 'https://picsum.photos/seed/' + seed + '/200';
         document.getElementById('av-titulo').textContent = titulo;
         document.getElementById('av-artista').textContent = artista;
         document.getElementById('av-comentario').value = '';
-        document.getElementById('mood-slider').value = 50;
-        document.getElementById('mood-label').textContent = 'Neutro';
         document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
         new bootstrap.Modal(document.getElementById('modalAvaliar')).show();
     }
     function enviarAvaliacao() {
