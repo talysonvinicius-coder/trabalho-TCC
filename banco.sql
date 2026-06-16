@@ -163,6 +163,7 @@ CREATE TABLE IF NOT EXISTS `bdmusica`.`musicas` (
   `genero_id` INT(11) NULL DEFAULT NULL COMMENT 'Chave estrangeira para gênero',
   `data_lancamento` DATE NULL DEFAULT NULL COMMENT 'Campo data de lançamento',
   `duracao` TIME NULL DEFAULT NULL COMMENT 'Campo duração da música',
+  `spotify_link` VARCHAR(500) NULL DEFAULT NULL COMMENT 'Link do YouTube da música',
   PRIMARY KEY (`id`),
   INDEX `artista_id` (`artista_id` ASC),
   INDEX `album_id` (`album_id` ASC),

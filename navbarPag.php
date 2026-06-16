@@ -2,7 +2,7 @@
     <div class="sidebar-pag-logo">🎶 SoundScore</div>
     <nav>
         <ul>
-            <li class="active">
+            <li>
                 <a href="paginicial.php"><i class="fas fa-home"></i> Início</a>
             </li>
             <li>
@@ -27,4 +27,14 @@
         <i class="fas fa-sign-out-alt"></i> Sair da conta
     </button>
 </aside>
+<script>
+    (function() {
+        const page = window.location.pathname.split('/').pop();
+        document.querySelectorAll('.sidebar-pag nav li a').forEach(a => {
+            if (a.getAttribute('href') === page) {
+                a.parentElement.classList.add('active');
+            }
+        });
+    })();
+</script>
 <script src="assets/js/app.js"></script>
