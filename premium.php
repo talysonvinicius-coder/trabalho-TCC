@@ -180,7 +180,7 @@
             <div class="premium-hero-info">
                 <span class="tag">👑 Plano Premium Ativo</span>
                 <h1>Olá, Usuário Premium</h1>
-                <p>Aproveite música sem limites, sem anúncios e com qualidade máxima.</p>
+                <p>Avalie sem limites, interaja com outros usuários e ouça as músicas diretamente do Soundscore enquanto faz suas avaliações</p>
                 <button class="btn-nova-playlist" onclick="showPage('playlists', document.querySelectorAll('.tab-btn')[1])">
                     <i class="fas fa-list me-2"></i>Ver minhas listas
                 </button>
@@ -190,23 +190,23 @@
 
         <section class="fade-in">
             <div class="section-header">
-                <h2><i class="fas fa-fire me-2" style="color:#7c4dff;"></i>Mix Diário</h2>
+                <h2><i class="fas fa-star me-2" style="color:#7c4dff;"></i>Funcionalidades do Seu Premium</h2>
             </div>
             <div class="d-flex flex-column gap-2">
                 <?php
-                $mixes = [
-                    ['emoji' => '🎧', 'nome' => 'Mix Diário 1', 'desc' => 'Artistas recomendados para você'],
-                    ['emoji' => '🎵', 'nome' => 'Descobertas da Semana', 'desc' => 'Novidades baseadas no seu gosto'],
-                    ['emoji' => '🌙', 'nome' => 'Noite Tranquila', 'desc' => 'Lo-fi e sons relaxantes'],
+                $funcionalidades = [
+                    ['emoji' => '🎵', 'nome' => 'Reproduzir Áudio', 'desc' => 'Ouça todas as músicas sem restrições'],
+                    ['emoji' => '📋', 'nome' => 'Criar Listas', 'desc' => 'Organize suas músicas favoritas em playlists'],
+                    ['emoji' => '👥', 'nome' => 'Seguir Perfis', 'desc' => 'Conecte-se com outros usuários da comunidade'],
+                    ['emoji' => '💬', 'nome' => 'Comentar Músicas', 'desc' => 'Compartilhe suas opiniões e interaja'],
                 ];
-                foreach ($mixes as $m): ?>
+                foreach ($funcionalidades as $f): ?>
                 <div class="mix-card">
-                    <div class="mix-cover"><?php echo $m['emoji']; ?></div>
+                    <div class="mix-cover"><?php echo $f['emoji']; ?></div>
                     <div class="mix-info">
-                        <h5><?php echo $m['nome']; ?></h5>
-                        <p><?php echo $m['desc']; ?></p>
+                        <h5><?php echo $f['nome']; ?></h5>
+                        <p><?php echo $f['desc']; ?></p>
                     </div>
-                    <button class="mix-play"><i class="fas fa-play"></i></button>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -243,12 +243,12 @@
             <div class="beneficios-grid">
                 <?php
                 $beneficios = [
-                    ['icon' => 'fas fa-music',        'titulo' => 'Áudio 320kbps',         'desc' => 'Qualidade máxima de som em todas as faixas'],
-                    ['icon' => 'fas fa-ban',           'titulo' => 'Sem anúncios',           'desc' => 'Ouça sem interrupções publicitárias'],
-                    ['icon' => 'fas fa-download',      'titulo' => 'Downloads ilimitados',   'desc' => 'Salve músicas para ouvir offline'],
-                    ['icon' => 'fas fa-list',          'titulo' => 'Listas ilimitadas',      'desc' => 'Crie quantas playlists quiser'],
-                    ['icon' => 'fas fa-random',        'titulo' => 'Modo aleatório',         'desc' => 'Shuffle em qualquer playlist'],
-                    ['icon' => 'fas fa-headphones',    'titulo' => 'Acesso antecipado',      'desc' => 'Ouça lançamentos antes de todos'],
+                    ['icon' => 'fas fa-music',        'titulo' => 'Reproduzir Áudio',       'desc' => 'Ouça todas as músicas sem limites'],
+                    ['icon' => 'fas fa-list',         'titulo' => 'Listas Ilimitadas',      'desc' => 'Crie e organize suas próprias playlists'],
+                    ['icon' => 'fas fa-users',        'titulo' => 'Seguir Perfis',          'desc' => 'Conecte-se com outros usuários da comunidade'],
+                    ['icon' => 'fas fa-comments',     'titulo' => 'Comentários em Músicas', 'desc' => 'Compartilhe suas opiniões e insights'],
+                    ['icon' => 'fas fa-star',         'titulo' => 'Avaliar Sem Limites',    'desc' => 'Avalie quantas músicas quiser'],
+                    ['icon' => 'fas fa-crown',        'titulo' => 'Acesso Completo',        'desc' => 'Desbloqueie todas as funcionalidades do site'],
                 ];
                 foreach ($beneficios as $b): ?>
                 <div class="beneficio-card">
