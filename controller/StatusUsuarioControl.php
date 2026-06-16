@@ -1,10 +1,11 @@
 <?php
-/**
-* Este arquivo funciona como um controlador de fluxo para a alteração de status
-* de um usuário (Ativo/Inativo).
-*/
-// 1. Importação da Camada de Persistência (Model/DAO)
-require_once '../Model/dao/UsuarioDAO.php';
+session_start();
+
+if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
+    header("Location: ../login.html");
+    exit;
+}
+require_once '../model/dao/UsuarioDAO.php';
 // 2. Verificação de Segurança
 if (isset($_POST['id']) && isset($_POST['status'])) {
 

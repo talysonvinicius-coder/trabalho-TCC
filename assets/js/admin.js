@@ -82,11 +82,11 @@ async function abrirModal(id) {
     document.getElementById('edit-email').value = u.email;
     document.getElementById('edit-senha').value = '';
 
-    document.getElementById('modal-editar').style.display = 'flex';
+    document.getElementById('modal-editar').classList.add('aberto');
 }
 
 function fecharModal() {
-    document.getElementById('modal-editar').style.display = 'none';
+    document.getElementById('modal-editar').classList.remove('aberto');
 }
 
 document.getElementById('form-editar').addEventListener('submit', async (e) => {

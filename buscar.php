@@ -1,4 +1,5 @@
 <?php
+session_start();
 $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
 $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
 $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -91,7 +92,13 @@ $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <input type="text" id="inputBusca" placeholder="Pesquisar gênero..." oninput="filtrar()">
         </div>
         <div class="user-controls">
-            <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php if (!$isPremium): ?>
+                <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php else: ?>
+                <span style="font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block;">
+                    <i class="fas fa-crown me-1"></i>Premium
+                </span>
+            <?php endif; ?>
         </div>
     </header>
 

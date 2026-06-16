@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<?php
+session_start();
+if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
+    header('Location: index.html');
+    exit();
+}
+?>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">

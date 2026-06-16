@@ -1,0 +1,114 @@
+    .container-listas {
+    padding: 30px;
+    color: #fff;
+}
+
+.header-listas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.btn-nova-lista {
+    background: #1db954;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.grid-letterboxd {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 30px;
+}
+
+.card-lista {
+    background: transparent;
+    transition: transform 0.2s;
+}
+
+.card-lista:hover {
+    transform: translateY(-5px);
+}
+
+.stack-capas {
+    display: flex;
+    position: relative;
+    height: 140px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.stack-capas img {
+    height: 140px;
+    width: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 2px solid #121212;
+    position: absolute;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+    transition: margin-left 0.3s;
+}
+
+.stack-capas img:nth-child(1) {
+    left: 0;
+    z-index: 3;
+}
+
+.stack-capas img:nth-child(2) {
+    left: 45px;
+    z-index: 2;
+}
+
+.stack-capas img:nth-child(3) {
+    left: 90px;
+    z-index: 1;
+}
+
+.stack-capas:hover img:nth-child(2) {
+    margin-left: 10px;
+}
+
+.stack-capas:hover img:nth-child(3) {
+    margin-left: 20px;
+}
+
+.info-lista h3 {
+    font-size: 1rem;
+    margin: 0 0 5px 0;
+    color: #fff;
+}
+
+.badge-count {
+    font-size: 0.8rem;
+    color: #b3b3b3;
+}
+
+.acoes-lista {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.acoes-lista a, .acoes-lista button {
+    color: #b3b3b3;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.acoes-lista a:hover, .acoes-lista button:hover {
+    color: #fff;
+}
+
+.form-excluir {
+    margin: 0;
+    padding: 0;
+}

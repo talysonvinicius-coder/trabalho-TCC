@@ -1,4 +1,5 @@
 <?php
+session_start();
 try {
     $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
     $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
@@ -197,7 +198,13 @@ try {
             <input type="text" placeholder="O que você quer ouvir?" id="search-input">
         </div>
         <div class="user-controls">
-            <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php if (!$isPremium): ?>
+                <a href="premium.php" class="badge-upgrade"><i class="fas fa-bolt me-1"></i>Upgrade</a>
+            <?php else: ?>
+                <span style="font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block;">
+                    <i class="fas fa-crown me-1"></i>Premium
+                </span>
+            <?php endif; ?>
             <a href="homeAdmin.php" id="btn-admin" style="display:none; background:linear-gradient(135deg,#7c4dff,#4fc3f7); border:none; color:#fff; font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; text-decoration:none; transition:filter 0.2s;"><i class="fas fa-shield-alt me-1"></i>Ir para a Administração</a>
         </div>
     </header>

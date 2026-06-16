@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -255,7 +256,14 @@
         </div>
         <div class="profile-info">
             <h1 id="profile-name">Carregando...</h1>
-            <p class="profile-username" id="profile-username">@usuario</p>
+            <p class="profile-username" id="profile-username" style="margin-bottom: 8px;">@usuario</p>
+            <?php if ($isPremium): ?>
+                <span style="font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block; margin-bottom: 12px;">
+                    <i class="fas fa-crown me-1"></i>Premium
+                </span>
+            <?php else: ?>
+                <div style="margin-bottom: 12px;"></div>
+            <?php endif; ?>
             <div class="profile-stats">
                 <div class="stat-item">
                     <span class="stat-num">248</span>

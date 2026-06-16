@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
+    header('Location: index.html');
+    exit();
+}
+
 require_once __DIR__ . '/model/dao/UsuarioDAO.php';
 
 $usuarioDAO = new UsuarioDAO();

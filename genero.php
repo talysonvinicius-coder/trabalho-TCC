@@ -18,10 +18,8 @@ if (!$genero_atual) {
 }
 
 $stmt_musicas = $pdo->prepare("
-    SELECT m.titulo, a.nome AS artista, al.nome AS album
+    SELECT m.titulo, m.artista as artista, m.album AS album
     FROM musicas m
-    JOIN artista a ON m.artista_id = a.id
-    LEFT JOIN album al ON m.album_id = al.id
     WHERE m.genero_id = :id
 ");
 $stmt_musicas->execute(['id' => $id_genero]);

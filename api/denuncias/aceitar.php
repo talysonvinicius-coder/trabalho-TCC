@@ -1,5 +1,12 @@
 <?php
+session_start();
 header('Content-Type: application/json');
+
+if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['sucesso' => false, 'mensagem' => 'Acesso negado']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
