@@ -35,4 +35,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <i class="fas fa-sign-out-alt"></i> Sair da conta
     </button>
 </aside>
+<script>
+    (function() {
+        const page = window.location.pathname.split('/').pop();
+        document.querySelectorAll('.sidebar-pag nav li a').forEach(a => {
+            if (a.getAttribute('href') === page) {
+                a.parentElement.classList.add('active');
+            }
+        });
+    })();
+</script>
 <script src="assets/js/app.js"></script>

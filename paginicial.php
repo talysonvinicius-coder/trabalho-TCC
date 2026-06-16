@@ -1,12 +1,43 @@
 <?php
 session_start();
+$musica_nova  = null;
+$todas_musicas = [];
 try {
     $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
+
     $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
     $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Busca todas as músicas ordenadas da mais recente para a mais antiga
+    $stmt_todas = $pdo->query("
+        SELECT m.id, m.titulo, m.spotify_link,
+               COALESCE(a.nome, 'Artista desconhecido') AS artista,
+               al.nome AS album
+        FROM musicas m
+        LEFT JOIN artista a ON m.artista_id = a.id
+        LEFT JOIN album al ON m.album_id = al.id
+        ORDER BY m.id DESC
+    ");
+    $todas_musicas = $stmt_todas->fetchAll(PDO::FETCH_ASSOC);
+    $musica_nova   = $todas_musicas[0] ?? null;
 } catch (PDOException $e) {
     $generos = [];
     error_log($e->getMessage());
+}
+
+$notas_emoji = ['🎵','🎶','🎼','🎹','🥁','🎸','🎷','🎺','🎻','🪗'];
+
+// Extrai o videoId de qualquer formato de URL do YouTube
+function ytVideoId($url) {
+    if (!$url) return null;
+    preg_match('/(?:youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/', $url, $m);
+    return $m[1] ?? null;
+}
+
+// Retorna a thumbnail do YouTube ou null
+function ytThumb($url) {
+    $id = ytVideoId($url);
+    return $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
 }
 ?>
 <!DOCTYPE html>
@@ -109,6 +140,7 @@ try {
             transition: background 0.3s, transform 0.3s;
             cursor: pointer;
             position: relative;
+            height: 100%;
         }
         .music-card:hover { background: var(--bg-card-hover); transform: translateY(-4px); }
         .music-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
@@ -180,11 +212,44 @@ try {
         .fade-in.visible { opacity: 1; transform: translateY(0); }
 
         /* Footer slideshow */
-        .player { padding: 0; overflow: hidden; height: 50px; position: fixed; bottom: 0; left: 240px; width: calc(100% - 240px); z-index: 40; }
-        .player img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 1s ease; }
+        .player { padding: 0; overflow: hidden; height: 50px; position: fixed; bottom: 0; left: 240px; width: calc(100% - 240px); z-index: 40; background: #000; }
+        .player img { width: 100%; height: 100%; object-fit: fill; display: block; transition: opacity 1s ease; }
 
         /* Sidebar premium banner */
         .sidebar-premium-banner { margin-top: 10px; }
+
+        /* Modal Avaliação */
+        #modalAvaliar .modal-content {
+            background: rgba(15,15,25,0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #fff;
+        }
+        .avaliar-header { display: flex; gap: 16px; align-items: center; padding: 20px 20px 0; }
+        .avaliar-header img { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+        .avaliar-header .info h5 { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
+        .avaliar-header .info p  { font-size: 0.8rem; color: var(--text-muted-custom); margin: 0; }
+        .star-rating { display: flex; gap: 6px; font-size: 1.6rem; cursor: pointer; }
+        .star-rating span { color: rgba(255,255,255,0.2); transition: color 0.15s; }
+        .star-rating span.active { color: #ffc107; }
+        .mood-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+            background: linear-gradient(to right, #4fc3f7, #7c4dff, #ff4081); outline: none; }
+        .mood-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px;
+            border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .mood-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted-custom); margin-top: 4px; }
+        .comentario-textarea { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px; color: #fff; resize: none; width: 100%; padding: 10px 14px; font-size: 0.85rem; }
+        .comentario-textarea::placeholder { color: rgba(255,255,255,0.35); }
+        .comentario-textarea:focus { outline: none; border-color: #7c4dff; }
+        .feedback-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; cursor: pointer; transition: 0.2s; color: #fff; }
+        .chip:hover, .chip.selected { background: rgba(124,77,255,0.35); border-color: #7c4dff; }
+        .btn-avaliar-enviar { background: linear-gradient(135deg, #7c4dff, #4fc3f7);
+            border: none; color: #fff; border-radius: 25px; padding: 10px 0;
+            font-weight: 700; width: 100%; font-size: 0.95rem; transition: filter 0.2s; }
+        .btn-avaliar-enviar:hover { filter: brightness(1.15); }
     </style>
 </head>
 <body>
@@ -249,32 +314,71 @@ try {
         </div>
     </section>
 
-    <!-- Avaliadas recentemente -->
+    <!-- Adicionadas recentemente -->
     <section class="mb-5 fade-in">
         <div class="section-header">
-            <h2>Avaliadas recentemente</h2>
-            <a href="#" class="see-all">Ver tudo</a>
+            <h2>Adicionadas recentemente</h2>
+            <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalAvaliadasRecente">Ver tudo</a>
         </div>
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
             <?php
-            $musicas = [
-                ['seed' => 'music1', 'titulo' => 'Midnight City',   'artista' => 'M83',         'score' => '9.8'],
-                ['seed' => 'music2', 'titulo' => 'Blinding Lights', 'artista' => 'The Weeknd',  'score' => '9.5'],
-                ['seed' => 'music3', 'titulo' => 'Breathe Deeper',  'artista' => 'Tame Impala', 'score' => '9.2'],
-                ['seed' => 'music4', 'titulo' => 'Levitating',      'artista' => 'Dua Lipa',    'score' => '9.0'],
-            ];
-            foreach ($musicas as $m): ?>
+            $recentes = array_slice($todas_musicas, 0, 4);
+            foreach ($recentes as $i => $m):
+                $thumb = ytThumb($m['spotify_link']);
+                $emoji = $notas_emoji[$i % count($notas_emoji)];
+            ?>
             <div class="col">
                 <div class="music-card">
-                    <img src="https://picsum.photos/seed/<?php echo $m['seed']; ?>/200" alt="<?php echo $m['titulo']; ?>">
+                    <?php if ($thumb): ?>
+                        <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                    <?php else: ?>
+                        <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3.5rem;"><?php echo $emoji; ?></div>
+                    <?php endif; ?>
                     <button class="play-overlay"><i class="fas fa-play"></i></button>
                     <div class="card-body">
-                        <h4><?php echo $m['titulo']; ?></h4>
-                        <p><?php echo $m['artista']; ?> • <span class="score-badge"><?php echo $m['score']; ?></span></p>
+                        <?php if ($i === 0): ?>
+                        <span style="font-size:0.65rem;font-weight:700;background:linear-gradient(135deg,#7c4dff,#4fc3f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;letter-spacing:1px;">✦ Nova</span>
+                        <?php endif; ?>
+                        <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                        <p><?php echo htmlspecialchars($m['artista']); ?><?php echo !empty($m['album']) ? ' • ' . htmlspecialchars($m['album']) : ''; ?></p>
                     </div>
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($recentes)): ?>
+                <p class="text-muted">Nenhuma música cadastrada.</p>
+            <?php endif; ?>
+        </div>
+    </section>
+    <!-- Recomendações Para Você -->
+    <section class="mb-5 fade-in">
+        <div class="section-header">
+            <h2>Recomendações Para Você</h2>
+            <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalRecomendacoes">Ver tudo</a>
+        </div>
+        <div class="d-flex flex-nowrap gap-3 overflow-auto pb-2" style="scrollbar-width:thin;scrollbar-color:#7c4dff transparent;">
+            <?php foreach ($todas_musicas as $i => $m):
+                $thumb = ytThumb($m['spotify_link']);
+                $emoji = $notas_emoji[$i % count($notas_emoji)];
+            ?>
+            <div style="min-width:160px;max-width:160px;">
+                <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                    <?php if ($thumb): ?>
+                        <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                    <?php else: ?>
+                        <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:2.5rem;"><?php echo $emoji; ?></div>
+                    <?php endif; ?>
+                    <button class="play-overlay"><i class="fas fa-play"></i></button>
+                    <div class="card-body">
+                        <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                        <p><?php echo htmlspecialchars($m['artista']); ?></p>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php if (empty($todas_musicas)): ?>
+                <p class="text-muted">Nenhuma música cadastrada.</p>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -282,7 +386,7 @@ try {
     <section class="mb-5 fade-in">
         <div class="section-header">
             <h2>Artistas Recomendados</h2>
-            <a href="#" class="see-all">Ver tudo</a>
+            <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalArtistas">Ver tudo</a>
         </div>
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
             <?php
@@ -293,7 +397,7 @@ try {
             ];
             foreach ($artistas as $a): ?>
             <div class="col">
-                <div class="artist-card">
+                <div class="artist-card" onclick="abrirArtista('<?php echo $a['seed']; ?>','<?php echo addslashes($a['nome']); ?>')">
                     <img src="https://picsum.photos/seed/<?php echo $a['seed']; ?>/200" alt="<?php echo $a['nome']; ?>">
                     <h4><?php echo $a['nome']; ?></h4>
                     <p><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
@@ -303,6 +407,167 @@ try {
         </div>
     </section>
 </main>
+
+<!-- Modal Artista -->
+<div class="modal fade" id="modalArtista" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+        <div class="modal-content" style="background:rgba(15,15,25,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:#fff;">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0 px-4 pb-4">
+                <!-- Foto centralizada -->
+                <div class="text-center mb-3">
+                    <img id="art-foto" src="" alt="" style="width:180px;height:180px;border-radius:12px;object-fit:cover;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+                    <h4 id="art-nome" class="mt-3 mb-0 fw-bold"></h4>
+                    <p style="font-size:0.78rem;color:#b3b3b3;"><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
+                </div>
+                <!-- Músicas -->
+                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Músicas populares</p>
+                <div id="art-musicas" class="mb-4"></div>
+                <!-- Álbuns -->
+                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Álbuns</p>
+                <div id="art-albuns" class="d-flex gap-3 flex-wrap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Tudo - Artistas Recomendados -->
+<div class="modal fade" id="modalArtistas" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="background:#0a0a0a; color:#fff;">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-microphone me-2" style="color:#7c4dff;"></i>Artistas Recomendados</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto;">
+                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+                    <?php
+                    $artistasAll = [
+                        ['seed' => 'art1', 'nome' => 'The Weeknd'],
+                        ['seed' => 'art2', 'nome' => 'Tame Impala'],
+                        ['seed' => 'art3', 'nome' => 'Dua Lipa'],
+                    ];
+                    foreach ($artistasAll as $a): ?>
+                    <div class="col">
+                        <div class="artist-card">
+                            <img src="https://picsum.photos/seed/<?php echo $a['seed']; ?>/200" alt="<?php echo $a['nome']; ?>">
+                            <h4><?php echo $a['nome']; ?></h4>
+                            <p><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Tudo - Adicionadas Recentemente -->
+<div class="modal fade" id="modalAvaliadasRecente" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="background:#0a0a0a; color:#fff;">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-clock me-2" style="color:#7c4dff;"></i>Adicionadas Recentemente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto;">
+                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+                    <?php foreach ($todas_musicas as $i => $m):
+                        $thumb = ytThumb($m['spotify_link']);
+                        $emoji = $notas_emoji[$i % count($notas_emoji)];
+                    ?>
+                    <div class="col">
+                        <div class="music-card">
+                            <?php if ($thumb): ?>
+                                <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                            <?php else: ?>
+                                <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
+                            <?php endif; ?>
+                            <button class="play-overlay"><i class="fas fa-play"></i></button>
+                            <div class="card-body">
+                                <?php if ($i === 0): ?>
+                                <span style="font-size:0.62rem;font-weight:700;background:linear-gradient(135deg,#7c4dff,#4fc3f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;letter-spacing:1px;">✦ Nova</span>
+                                <?php endif; ?>
+                                <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                                <p><?php echo htmlspecialchars($m['artista']); ?><?php echo !empty($m['album']) ? ' &bull; ' . htmlspecialchars($m['album']) : ''; ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ver Tudo - Recomendações -->
+<div class="modal fade" id="modalRecomendacoes" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="background:#0a0a0a; color:#fff;">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title fw-bold"><i class="fas fa-music me-2" style="color:#7c4dff;"></i>Recomendações Para Você</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto;">
+                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+                    <?php foreach ($todas_musicas as $i => $m):
+                        $thumb = ytThumb($m['spotify_link']);
+                        $emoji = $notas_emoji[$i % count($notas_emoji)];
+                    ?>
+                    <div class="col">
+                        <div class="music-card" onclick="abrirAvaliar('banco<?php echo $m['id']; ?>','<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($m['artista'])); ?>')">
+                            <?php if ($thumb): ?>
+                                <img src="<?php echo $thumb; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+                            <?php else: ?>
+                                <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
+                            <?php endif; ?>
+                            <button class="play-overlay"><i class="fas fa-play"></i></button>
+                            <div class="card-body">
+                                <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
+                                <p><?php echo htmlspecialchars($m['artista']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Avaliação -->
+<div class="modal fade" id="modalAvaliar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content">
+            <div class="avaliar-header">
+                <img id="av-capa" src="" alt="capa">
+                <div class="info">
+                    <h5 id="av-titulo"></h5>
+                    <p id="av-artista"></p>
+                </div>
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <!-- Estrelas -->
+                <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Sua nota</p>
+                <div class="star-rating mb-3" id="stars">
+                    <span data-v="1">&#9733;</span>
+                    <span data-v="2">&#9733;</span>
+                    <span data-v="3">&#9733;</span>
+                    <span data-v="4">&#9733;</span>
+                    <span data-v="5">&#9733;</span>
+                </div>
+                <!-- Comentário -->
+                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
+                <textarea id="av-comentario" class="comentario-textarea" rows="3"
+                    placeholder="Ex: Uma das melhores músicas dos anos 90, marcante e poderosa..."></textarea>
+                <button class="btn-avaliar-enviar mt-3" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal de Comentário (Bootstrap) -->
 <div class="modal fade" id="modalComentario" tabindex="-1">
@@ -404,6 +669,60 @@ try {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Modal Avaliação
+    document.querySelectorAll('#stars span').forEach(star => {
+        star.addEventListener('click', function() {
+            const val = +this.dataset.v;
+            document.querySelectorAll('#stars span').forEach(s => s.classList.toggle('active', +s.dataset.v <= val));
+        });
+    });
+    function toggleChip(el) { el.classList.toggle('selected'); }
+
+    const artistaData = {
+        'art1': {
+            musicas: ['Blinding Lights','Starboy','Save Your Tears','Die For You','The Hills'],
+            albuns:  [{seed:'alb1',nome:'After Hours'},{seed:'alb2',nome:'Starboy'},{seed:'alb3',nome:'Kiss Land'}]
+        },
+        'art2': {
+            musicas: ['The Less I Know The Better','Feels Like We Only Go Backwards','Let It Happen','Eventually','New Person'],
+            albuns:  [{seed:'alb4',nome:'Currents'},{seed:'alb5',nome:'Lonerism'},{seed:'alb6',nome:'Innerspeaker'}]
+        },
+        'art3': {
+            musicas: ['Levitating','Don\'t Start Now','Physical','Break My Heart','New Rules'],
+            albuns:  [{seed:'alb7',nome:'Future Nostalgia'},{seed:'alb8',nome:'Radical Optimism'},{seed:'alb9',nome:'Dua Lipa'}]
+        }
+    };
+    function abrirArtista(seed, nome) {
+        const d = artistaData[seed] || { musicas: [], albuns: [] };
+        document.getElementById('art-foto').src = 'https://picsum.photos/seed/' + seed + '/200';
+        document.getElementById('art-nome').textContent = nome;
+        document.getElementById('art-musicas').innerHTML = d.musicas.map((m, i) =>
+            `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <span style="color:#b3b3b3;font-size:0.8rem;width:16px;text-align:right;">${i+1}</span>
+                <i class="fas fa-music" style="color:#7c4dff;font-size:0.75rem;"></i>
+                <span style="font-size:0.88rem;">${m}</span>
+            </div>`
+        ).join('');
+        document.getElementById('art-albuns').innerHTML = d.albuns.map(a =>
+            `<div style="text-align:center;width:90px;">
+                <img src="https://picsum.photos/seed/${a.seed}/200" style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-bottom:6px;">
+                <p style="font-size:0.72rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.nome}</p>
+            </div>`
+        ).join('');
+        new bootstrap.Modal(document.getElementById('modalArtista')).show();
+    }
+    function abrirAvaliar(seed, titulo, artista) {
+        document.getElementById('av-capa').src = 'https://picsum.photos/seed/' + seed + '/200';
+        document.getElementById('av-titulo').textContent = titulo;
+        document.getElementById('av-artista').textContent = artista;
+        document.getElementById('av-comentario').value = '';
+        document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
+        new bootstrap.Modal(document.getElementById('modalAvaliar')).show();
+    }
+    function enviarAvaliacao() {
+        bootstrap.Modal.getInstance(document.getElementById('modalAvaliar')).hide();
+    }
 </script>
 </body>
 </html>
