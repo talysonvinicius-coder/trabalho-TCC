@@ -28,6 +28,23 @@ $stmt_musicas = $pdo->prepare("
 $stmt_musicas->execute(['id' => $id_genero]);
 $musicas = $stmt_musicas->fetchAll(PDO::FETCH_ASSOC);
 
+// Verifica se o usuário é premium (plano_id 2) ou admin (perfil admin ou perfil_id 2)
+$isPremium = (!empty($_SESSION['plano_id']) && (int)$_SESSION['plano_id'] === 2)
+          || (!empty($_SESSION['perfil'])   && $_SESSION['perfil'] === 'admin')
+          || (!empty($_SESSION['perfil'])   && $_SESSION['perfil'] === 'cliente' && !empty($_SESSION['plano_id']) && (int)$_SESSION['plano_id'] === 2);
+
+// Se admin tem plano_id=2 no banco, força premium
+if (!$isPremium && !empty($_SESSION['logado'])) {
+    try {
+        $stmt_plano = $pdo->prepare("SELECT u.plano_id, p.nome AS perfil FROM usuario u JOIN perfil p ON u.perfil_id = p.id JOIN login l ON l.usuario_id = u.id WHERE u.nome = :nome LIMIT 1");
+        $stmt_plano->execute(['nome' => $_SESSION['nome'] ?? '']);
+        $row = $stmt_plano->fetch(PDO::FETCH_ASSOC);
+        if ($row && ((int)$row['plano_id'] === 2 || $row['perfil'] === 'admin')) {
+            $isPremium = true;
+        }
+    } catch (Exception $e) {}
+}
+
 // Ícones por gênero
 $genreIcons = [
     'hip-hop' => '🎤', 'hiphop' => '🎤', 'rap' => '🎤', 'trap' => '🎤',
@@ -45,8 +62,14 @@ foreach ($genreIcons as $key => $emoji) {
     if (str_contains($nomeMin, $key)) { $icone = $emoji; break; }
 }
 
-// Notas musicais decorativas para as capas
+// Notas musicais decorativas para as capas (fallback)
 $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻', '🪗'];
+
+function ytThumb($url) {
+    if (!$url) return null;
+    preg_match('/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/', $url, $m);
+    return isset($m[1]) ? 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg' : null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -86,6 +109,7 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
             border: none; color: #fff; border-radius: 25px; padding: 10px 0;
             font-weight: 700; width: 100%; font-size: 0.95rem; transition: filter 0.2s; }
         .btn-avaliar-enviar:hover { filter: brightness(1.15); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -114,9 +138,12 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
         <div class="musicas-grid fade-in">
             <?php if (count($musicas) > 0): ?>
                 <?php foreach ($musicas as $i => $musica): ?>
-                    <div class="musica-card" onclick="abrirAvaliar('<?php echo $musica['id']; ?>', '<?php echo 'music' . ($i+1); ?>','<?php echo addslashes(htmlspecialchars($musica['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($musica['artista'])); ?>','<?php echo addslashes(htmlspecialchars($musica['spotify_link'] ?? '')); ?>')">
-                        <div class="musica-card-cover">
-                            <?php echo $notas[$i % count($notas)]; ?>
+                    <?php
+                        $thumb = ytThumb($musica['spotify_link'] ?? '');
+                    ?>
+                    <div class="musica-card" onclick="abrirAvaliar('<?php echo $musica['id']; ?>','<?php echo 'music' . ($i+1); ?>','<?php echo addslashes(htmlspecialchars($musica['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($musica['artista'])); ?>','<?php echo addslashes(htmlspecialchars($musica['spotify_link'] ?? '')); ?>')">
+                        <div class="musica-card-cover" <?php if ($thumb): ?>style="background-image:url('<?php echo $thumb; ?>');background-size:cover;background-position:center;font-size:0;"<?php endif; ?>>
+                            <?php if (!$thumb) echo $notas[$i % count($notas)]; ?>
                         </div>
                         <button class="musica-card-play"><i class="fas fa-play"></i></button>
                         <div class="musica-card-body">
@@ -150,21 +177,16 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
                 <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding:20px;">
-                <!-- Player YouTube ou Premium Lock -->
-                <?php if (!$isPremium): ?>
-                    <div class="premium-locked-banner" style="text-align: center; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px dashed #ffc107; margin-bottom: 16px;">
-                        <i class="fas fa-lock" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 10px;"></i>
-                        <h6 style="color: #fff; font-weight: 700; margin-bottom: 5px;">Funcionalidade Premium</h6>
-                        <p style="color: #b3b3b3; margin-bottom: 15px; font-size: 0.8rem;">Ouvir as músicas requer uma assinatura Premium.</p>
-                        <a href="premium.php" class="btn-upgrade" style="display: inline-block; padding: 6px 16px; background: #ffc107; color: #000; text-decoration: none; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">Fazer Upgrade</a>
-                    </div>
+                <!-- Player YouTube - apenas premium -->
+                <?php if ($isPremium): ?>
+                <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
+                    <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                </div>
+                <div id="yt-no-video" class="yt-no-video" style="display:none;">
+                    <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
+                </div>
                 <?php else: ?>
-                    <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
-                        <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                    </div>
-                    <div id="yt-no-video" class="yt-no-video" style="display:none;">
-                        <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
-                    </div>
+                <div id="free-video-block" style="margin-bottom:16px;"></div>
                 <?php endif; ?>
                 <!-- Avaliação JS data -->
                 <input type="hidden" id="av-musica-id" value="">
@@ -211,9 +233,10 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
             });
         });
 
+            const isPremium = <?php echo $isPremium ? 'true' : 'false'; ?>;
+
         function abrirAvaliar(musicaId, seed, titulo, artista, youtubeUrl) {
             document.getElementById('av-musica-id').value = musicaId;
-            document.getElementById('av-capa').src = 'https://picsum.photos/seed/' + seed + '/200';
             document.getElementById('av-titulo').textContent = titulo;
             document.getElementById('av-artista').textContent = artista;
             document.getElementById('av-comentario').value = '';
@@ -221,11 +244,43 @@ $notas = ['🎵', '🎶', '🎼', '🎹', '🥁', '🎸', '🎷', '🎺', '🎻'
             document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
 
             const videoId = extrairVideoId(youtubeUrl);
-            const playerWrap = document.getElementById('yt-player-wrap');
-            const noVideo    = document.getElementById('yt-no-video');
-            const iframe     = document.getElementById('yt-iframe');
+            document.getElementById('av-capa').src = videoId
+                ? 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg'
+                : 'https://picsum.photos/seed/' + seed + '/200';
 
-            if (playerWrap && noVideo && iframe) {
+            // Bloco free
+            const freeBlock = document.getElementById('free-video-block');
+            if (freeBlock) {
+                if (videoId) {
+                    freeBlock.innerHTML = `
+                        <div style="border-radius:12px;overflow:hidden;position:relative;margin-bottom:4px;">
+                            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg"
+                                 style="width:100%;display:block;border-radius:12px;filter:brightness(0.45);">
+                            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+                                <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener"
+                                   style="display:inline-flex;align-items:center;gap:8px;background:#ff0000;color:#fff;font-weight:700;font-size:0.88rem;padding:10px 22px;border-radius:25px;text-decoration:none;box-shadow:0 4px 16px rgba(255,0,0,0.4);"
+                                   onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">
+                                    <i class="fab fa-youtube" style="font-size:1.1rem;"></i> Assistir no YouTube
+                                </a>
+                                <a href="premium.php" style="font-size:0.75rem;color:#ffc107;text-decoration:none;opacity:0.85;">
+                                    <i class="fas fa-bolt me-1"></i>Assine o Premium para assistir aqui
+                                </a>
+                            </div>
+                        </div>`;
+                } else {
+                    freeBlock.innerHTML = `
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;text-align:center;margin-bottom:4px;">
+                            <i class="fas fa-compact-disc" style="font-size:2rem;color:#555;display:block;margin-bottom:10px;animation:spin 4s linear infinite;"></i>
+                            <p style="color:#b3b3b3;font-size:0.85rem;margin:0 0 12px;font-weight:600;">Música indisponível no momento</p>
+                            <a href="premium.php" style="font-size:0.75rem;color:#ffc107;text-decoration:none;">
+                                <i class="fas fa-bolt me-1"></i>Upgrade para mais conteúdo
+                            </a>
+                        </div>`;
+                }
+            }
+
+            // Bloco premium
+            if (isPremium && playerWrap && noVideo && iframe) {
                 if (videoId) {
                     iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
                     playerWrap.style.display = 'block';

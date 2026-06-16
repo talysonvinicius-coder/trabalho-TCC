@@ -8,21 +8,64 @@ if ($isPremium) {
     $listaDAO = new ListasDAO();
     $listasUsuario = $listaDAO->listarPorUsuario($_SESSION['id']);
 }
-$musicas = [
-    ['titulo' => 'Midnight City',   'artista' => 'M83',          'genero' => 'Eletrônica', 'nota' => 5, 'capa' => 'https://picsum.photos/seed/music1/200'],
-    ['titulo' => 'Blinding Lights', 'artista' => 'The Weeknd',   'genero' => 'Pop',        'nota' => 4, 'capa' => 'https://picsum.photos/seed/music2/200'],
-    ['titulo' => 'Breathe Deeper',  'artista' => 'Tame Impala',  'genero' => 'Rock',       'nota' => 5, 'capa' => 'https://picsum.photos/seed/music3/200'],
-    ['titulo' => 'Levitating',      'artista' => 'Dua Lipa',     'genero' => 'Pop',        'nota' => 3, 'capa' => 'https://picsum.photos/seed/music4/200'],
-    ['titulo' => 'Starboy',         'artista' => 'The Weeknd',   'genero' => 'R&B',        'nota' => 4, 'capa' => 'https://picsum.photos/seed/music5/200'],
-    ['titulo' => 'Heat Waves',      'artista' => 'Glass Animals','genero' => 'Indie',      'nota' => 2, 'capa' => 'https://picsum.photos/seed/music6/200'],
-];
 
-$total = count($musicas);
-$soma  = array_sum(array_column($musicas, 'nota'));
-$media = $total > 0 ? round($soma / $total, 1) : 0;
+$musicas   = [];
+$media     = 0;
+$total     = 0;
+$contagem  = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
 
-$contagem = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-foreach ($musicas as $m) $contagem[$m['nota']]++;
+if (!empty($_SESSION['id'])) {
+    try {
+        $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Últimas 6 músicas avaliadas pelo usuário
+        $stmt = $pdo->prepare("
+            SELECT av.nota, av.data_avaliacao,
+                   m.titulo, m.spotify_link,
+                   a.nome AS artista,
+                   g.nome AS genero
+            FROM avaliacoes av
+            JOIN musicas m  ON av.musica_id  = m.id
+            JOIN artista a  ON m.artista_id  = a.id
+            LEFT JOIN genero g ON m.genero_id = g.id
+            WHERE av.usuario_id = :uid
+            ORDER BY av.data_avaliacao DESC
+            LIMIT 6
+        ");
+        $stmt->execute(['uid' => $_SESSION['id']]);
+        $musicas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Média e contagem de todas as avaliações do usuário
+        $stmt2 = $pdo->prepare("
+            SELECT nota, COUNT(*) AS qtd
+            FROM avaliacoes
+            WHERE usuario_id = :uid
+            GROUP BY nota
+        ");
+        $stmt2->execute(['uid' => $_SESSION['id']]);
+        $rows = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+        $soma = 0;
+        foreach ($rows as $r) {
+            $n = (int) round($r['nota']);
+            $q = (int) $r['qtd'];
+            if (isset($contagem[$n])) $contagem[$n] += $q;
+            $soma  += $r['nota'] * $q;
+            $total += $q;
+        }
+        $media = $total > 0 ? round($soma / $total, 1) : 0;
+
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+    }
+}
+
+function ytThumbBib($url) {
+    if (!$url) return null;
+    preg_match('/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/', $url, $m);
+    return isset($m[1]) ? 'https://img.youtube.com/vi/' . $m[1] . '/hqdefault.jpg' : null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -149,22 +192,35 @@ foreach ($musicas as $m) $contagem[$m['nota']]++;
         <!-- Músicas avaliadas -->
         <div class="section-title"><i class="fas fa-music me-2" style="color:#1db954;"></i>Músicas Avaliadas</div>
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
-            <?php foreach ($musicas as $m): ?>
+            <?php if (empty($musicas)): ?>
+            <div class="col-12">
+                <div style="text-align:center;padding:40px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px dashed rgba(255,255,255,0.1);color:#b3b3b3;font-size:0.88rem;">
+                    <i class="fas fa-star mb-3" style="font-size:2rem;color:rgba(255,193,7,0.3);display:block;"></i>
+                    Você ainda não avaliou nenhuma música.
+                </div>
+            </div>
+            <?php else: ?>
+            <?php foreach ($musicas as $m):
+                $nota  = (int) round($m['nota']);
+                $thumb = ytThumbBib($m['spotify_link']);
+                $capa  = $thumb ?? 'https://picsum.photos/seed/' . urlencode($m['titulo']) . '/200';
+            ?>
             <div class="col">
                 <div class="music-card">
-                    <img src="<?php echo $m['capa']; ?>" alt="<?php echo $m['titulo']; ?>">
+                    <img src="<?php echo $capa; ?>" alt="<?php echo htmlspecialchars($m['titulo']); ?>">
                     <div class="info">
-                        <h6><?php echo $m['titulo']; ?></h6>
-                        <p><?php echo $m['artista']; ?> • <?php echo $m['genero']; ?></p>
+                        <h6><?php echo htmlspecialchars($m['titulo']); ?></h6>
+                        <p><?php echo htmlspecialchars($m['artista']); ?> • <?php echo htmlspecialchars($m['genero'] ?? ''); ?></p>
                         <div class="stars">
                             <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <i class="<?php echo $i <= $m['nota'] ? 'fas' : 'far'; ?> fa-star <?php echo $i > $m['nota'] ? 'empty' : ''; ?>"></i>
+                                <i class="<?php echo $i <= $nota ? 'fas' : 'far'; ?> fa-star <?php echo $i > $nota ? 'empty' : ''; ?>"></i>
                             <?php endfor; ?>
                         </div>
                     </div>
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
         <div id="modal-add-lista" class="modal fade" tabindex="-1">

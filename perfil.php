@@ -45,6 +45,28 @@ $stmt = $pdo->prepare("SELECT COUNT(*) FROM seguidores WHERE seguidor_id = :id")
 $stmt->execute(['id' => $uid]);
 $total_seguindo = $stmt->fetchColumn();
 
+// Lista de seguidores
+$stmt = $pdo->prepare("
+    SELECT u.id, u.nome, u.foto
+    FROM seguidores s
+    JOIN usuario u ON u.id = s.seguidor_id
+    WHERE s.seguido_id = :id
+    ORDER BY u.nome
+");
+$stmt->execute(['id' => $uid]);
+$lista_seguidores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Lista de seguindo
+$stmt = $pdo->prepare("
+    SELECT u.id, u.nome, u.foto
+    FROM seguidores s
+    JOIN usuario u ON u.id = s.seguido_id
+    WHERE s.seguidor_id = :id
+    ORDER BY u.nome
+");
+$stmt->execute(['id' => $uid]);
+$lista_seguindo = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM avaliacoes WHERE usuario_id = :id");
 $stmt->execute(['id' => $uid]);
 $total_avaliacoes = $stmt->fetchColumn();
@@ -157,7 +179,8 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
         }
 
         .profile-stats { display: flex; gap: 24px; }
-        .stat-item { text-align: center; cursor: default; }
+        .stat-item { text-align: center; cursor: pointer; }
+        .stat-item:hover .stat-label { color: #fff; }
         .stat-item .stat-num {
             font-size: 1.2rem; font-weight: 800;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -358,12 +381,12 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
                 <p class="bio-text">"<?php echo htmlspecialchars($usuario['bio']); ?>"</p>
             <?php endif; ?>
             <div class="profile-stats">
-                <div class="stat-item">
-                    <span class="stat-num"><?php echo $total_seguidores; ?></span>
+                <div class="stat-item" data-bs-toggle="modal" data-bs-target="#modalSeguidores">
+                    <span class="stat-num" id="cnt-seguidores"><?php echo $total_seguidores; ?></span>
                     <span class="stat-label">Seguidores</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-num"><?php echo $total_seguindo; ?></span>
+                <div class="stat-item" data-bs-toggle="modal" data-bs-target="#modalSeguindo">
+                    <span class="stat-num" id="cnt-seguindo"><?php echo $total_seguindo; ?></span>
                     <span class="stat-label">Seguindo</span>
                 </div>
                 <div class="stat-item">
@@ -489,6 +512,73 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
 
     </div>
 </main>
+
+<!-- Modal Seguidores -->
+<div class="modal fade" id="modalSeguidores" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:400px;">
+        <div class="modal-content" style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:16px;color:#fff;">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding:16px 20px;">
+                <h6 class="modal-title fw-bold"><i class="fas fa-users me-2" style="color:#7c4dff;"></i>Seguidores (<?php echo $total_seguidores; ?>)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding:8px 16px;">
+                <?php if (empty($lista_seguidores)): ?>
+                    <p style="color:#b3b3b3;font-size:0.85rem;text-align:center;padding:20px 0;">Nenhum seguidor ainda.</p>
+                <?php else: ?>
+                    <?php foreach ($lista_seguidores as $u): ?>
+                    <div class="d-flex align-items-center gap-3" style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#7c4dff,#4fc3f7);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;overflow:hidden;">
+                            <?php if (!empty($u['foto'])): ?>
+                                <img src="<?php echo htmlspecialchars($u['foto']); ?>" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                            <?php else: ?>
+                                <?php echo strtoupper(mb_substr($u['nome'], 0, 1)); ?>
+                            <?php endif; ?>
+                        </div>
+                        <a href="perfil_usuario.php?id=<?php echo $u['id']; ?>" style="font-size:0.9rem;color:#fff;text-decoration:none;flex:1;" onmouseover="this.style.color='#c4a8ff'" onmouseout="this.style.color='#fff'"><?php echo htmlspecialchars($u['nome']); ?></a>
+                        <a href="perfil_usuario.php?id=<?php echo $u['id']; ?>" style="font-size:0.75rem;color:var(--accent);text-decoration:none;white-space:nowrap;" title="Ver perfil"><i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Seguindo -->
+<div class="modal fade" id="modalSeguindo" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:400px;">
+        <div class="modal-content" style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:16px;color:#fff;">
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08);padding:16px 20px;">
+                <h6 class="modal-title fw-bold"><i class="fas fa-user-check me-2" style="color:#7c4dff;"></i>Seguindo (<span id="modal-cnt-seguindo"><?php echo $total_seguindo; ?></span>)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="lista-seguindo-body" style="padding:8px 16px;">
+                <?php if (empty($lista_seguindo)): ?>
+                    <p style="color:#b3b3b3;font-size:0.85rem;text-align:center;padding:20px 0;">Você ainda não segue ninguém.</p>
+                <?php else: ?>
+                    <?php foreach ($lista_seguindo as $u): ?>
+                    <div class="d-flex align-items-center gap-3" id="row-seguindo-<?php echo $u['id']; ?>" style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#7c4dff,#4fc3f7);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;overflow:hidden;">
+                            <?php if (!empty($u['foto'])): ?>
+                                <img src="<?php echo htmlspecialchars($u['foto']); ?>" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                            <?php else: ?>
+                                <?php echo strtoupper(mb_substr($u['nome'], 0, 1)); ?>
+                            <?php endif; ?>
+                        </div>
+                        <a href="perfil_usuario.php?id=<?php echo $u['id']; ?>" style="font-size:0.9rem;color:#fff;text-decoration:none;flex:1;" onmouseover="this.style.color='#c4a8ff'" onmouseout="this.style.color='#fff'"><?php echo htmlspecialchars($u['nome']); ?></a>
+                        <button
+                            onclick="pararDeSeguir(<?php echo $u['id']; ?>, this)"
+                            style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);color:#fff;border-radius:20px;padding:5px 14px;font-size:0.78rem;cursor:pointer;transition:background 0.2s,border-color 0.2s;"
+                            onmouseover="this.style.background='rgba(255,64,129,0.2)';this.style.borderColor='rgba(255,64,129,0.5)';"
+                            onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,255,255,0.18)';"
+                        >Parar de seguir</button>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Editar Perfil -->
 <div class="modal fade" id="modalEditarPerfil" tabindex="-1">
@@ -643,6 +733,32 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
             avatarWrap.insertBefore(imgMain, avatarWrap.querySelector('.avatar-overlay'));
         }
         imgMain.src = src;
+    }
+
+    async function pararDeSeguir(id, btn) {
+        btn.disabled = true;
+        const fd = new FormData();
+        fd.append('seguido_id', id);
+        fd.append('acao', 'desseguir');
+        try {
+            const res = await fetch('api/usuarios/seguir.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById('row-seguindo-' + id)?.remove();
+                const cnt = document.getElementById('cnt-seguindo');
+                const cntModal = document.getElementById('modal-cnt-seguindo');
+                const novoVal = Math.max(0, parseInt(cnt.textContent) - 1);
+                cnt.textContent = novoVal;
+                cntModal.textContent = novoVal;
+                mostrarToast('Você parou de seguir este usuário.');
+            } else {
+                btn.disabled = false;
+                mostrarToast(data.erro || 'Erro ao parar de seguir.', true);
+            }
+        } catch(e) {
+            btn.disabled = false;
+            mostrarToast('Erro de conexão.', true);
+        }
     }
 
     function mostrarToast(msg, erro = false) {

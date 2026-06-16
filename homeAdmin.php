@@ -126,8 +126,34 @@
         .btn-play-featured:hover { filter: brightness(1.15); transform: scale(1.04) !important; background: linear-gradient(135deg, #7c4dff, #4fc3f7) !important; }
         .btn-like-featured:hover { border-color: #7c4dff; color: #7c4dff; }
         .btn-like-featured.ativo { border-color: #7c4dff; color: #7c4dff; }
-        /* Footer slideshow */
-        .player { left: 240px !important; width: calc(100% - 240px) !important; }
+        /* Modal Resumo */
+        .modal-resumo .modal-content {
+            background: rgba(15,15,25,0.97);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #fff;
+        }
+        .modal-resumo .modal-header {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 20px 24px 16px;
+        }
+        .modal-resumo .modal-title { font-size: 1rem; font-weight: 700; }
+        .resumo-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .resumo-row:last-child { border-bottom: none; }
+        .resumo-row-icon {
+            width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(124,77,255,0.3), rgba(79,195,247,0.2));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; color: #c4a8ff;
+        }
+        .resumo-row-info { flex: 1; min-width: 0; }
+        .resumo-row-info strong { display: block; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .resumo-row-info small { color: #b3b3b3; font-size: 0.72rem; }
+        .resumo-row-badge { font-size: 0.72rem; color: #b3b3b3; white-space: nowrap; flex-shrink: 0; }
         body { display: flex; height: 100vh; overflow: hidden; }
         .content { margin-left: 240px; width: calc(100% - 240px); overflow-y: auto; padding: 20px 32px 80px; }
     </style>
@@ -190,16 +216,6 @@
                         <div class="card-body">
                             <h4>Categorias</h4>
                             <p>Gerencie categorias e visibilidade.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="music-card">
-                        <img src="https://picsum.photos/seed/admin4/200" alt="Configurações">
-                        <button class="play-overlay"><i class="fas fa-cogs"></i></button>
-                        <div class="card-body">
-                            <h4>Configurações</h4>
-                            <p>Ajuste parciais e políticas do app.</p>
                         </div>
                     </div>
                 </div>
@@ -280,33 +296,185 @@
         <section class="mb-5 fade-in">
             <div class="section-header">
                 <h2>Resumo da plataforma</h2>
-                <a href="#" class="see-all">Detalhes</a>
             </div>
             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+                <?php
+                    $novos_usuarios = $pdo->query("
+                        SELECT COUNT(*) FROM usuario
+                        WHERE data_criacao >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                    ")->fetchColumn();
+                    $total_avaliacoes = $pdo->query("SELECT COUNT(*) FROM avaliacoes")->fetchColumn();
+                    $total_musicas    = $pdo->query("SELECT COUNT(*) FROM musicas")->fetchColumn();
+                    $usuarios_premium = $pdo->query("SELECT COUNT(*) FROM usuario WHERE plano_id = 2")->fetchColumn();
+
+                    // Últimos 5 usuários novos desta semana
+                    $ult_usuarios = $pdo->query("
+                        SELECT u.nome, u.data_criacao, pl.nome AS plano
+                        FROM usuario u JOIN planos pl ON u.plano_id = pl.id
+                        WHERE u.data_criacao >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                        ORDER BY u.data_criacao DESC LIMIT 5
+                    ")->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Últimas 5 avaliações
+                    $ult_avaliacoes = $pdo->query("
+                        SELECT u.nome, m.titulo, av.nota, av.data_avaliacao
+                        FROM avaliacoes av
+                        JOIN usuario u ON av.usuario_id = u.id
+                        JOIN musicas m ON av.musica_id = m.id
+                        ORDER BY av.data_avaliacao DESC LIMIT 5
+                    ")->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Últimas 5 músicas
+                    $ult_musicas = $pdo->query("
+                        SELECT m.titulo, a.nome AS artista, m.id
+                        FROM musicas m
+                        LEFT JOIN artista a ON m.artista_id = a.id
+                        ORDER BY m.id DESC LIMIT 5
+                    ")->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Últimos 5 usuários premium
+                    $ult_premium = $pdo->query("
+                        SELECT u.nome, u.data_criacao
+                        FROM usuario u
+                        WHERE u.plano_id = 2
+                        ORDER BY u.data_criacao DESC LIMIT 5
+                    ")->fetchAll(PDO::FETCH_ASSOC);
+                ?>
                 <div class="col">
-                    <div class="artist-card">
+                    <div class="artist-card" onclick="abrirResumo('novos-usuarios')">
                         <img src="https://picsum.photos/seed/admin5/200" alt="Novos usuários">
                         <h4>Novos Usuários</h4>
-                        <p><span class="score-badge">+24</span> nesta semana</p>
+                        <p><span class="score-badge">+<?php echo $novos_usuarios; ?></span> nesta semana</p>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="artist-card">
-                        <img src="https://picsum.photos/seed/admin6/200" alt="Atividade">
-                        <h4>Atividade</h4>
-                        <p><span class="score-badge">96%</span> do sistema ativo</p>
+                    <div class="artist-card" onclick="abrirResumo('avaliacoes')">
+                        <img src="https://picsum.photos/seed/admin6/200" alt="Avaliações">
+                        <h4>Avaliações</h4>
+                        <p><span class="score-badge"><?php echo $total_avaliacoes; ?></span> no total</p>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="artist-card">
-                        <img src="https://picsum.photos/seed/admin7/200" alt="Suporte">
-                        <h4>Suporte</h4>
-                        <p><span class="score-badge">3</span> chamados abertos</p>
+                    <div class="artist-card" onclick="abrirResumo('musicas')">
+                        <img src="https://picsum.photos/seed/admin7/200" alt="Músicas">
+                        <h4>Músicas</h4>
+                        <p><span class="score-badge"><?php echo $total_musicas; ?></span> cadastradas</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="artist-card" onclick="abrirResumo('premium')">
+                        <img src="https://picsum.photos/seed/admin9/200" alt="Premium">
+                        <h4>Usuários Premium</h4>
+                        <p><span class="score-badge"><?php echo $usuarios_premium; ?></span> assinantes</p>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <!-- Modal Novos Usuários -->
+    <div class="modal fade modal-resumo" id="modal-novos-usuarios" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2" style="color:#7c4dff;"></i>Novos Usuários — Últimos 7 dias</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px;">
+                    <?php if (empty($ult_usuarios)): ?>
+                        <p style="text-align:center;color:#b3b3b3;">Nenhum usuário cadastrado esta semana.</p>
+                    <?php else: foreach ($ult_usuarios as $u): ?>
+                        <div class="resumo-row">
+                            <div class="resumo-row-icon"><i class="fas fa-user"></i></div>
+                            <div class="resumo-row-info">
+                                <strong><?php echo htmlspecialchars($u['nome']); ?></strong>
+                                <small><?php echo htmlspecialchars($u['plano']); ?></small>
+                            </div>
+                            <span class="resumo-row-badge"><?php echo date('d/m/Y', strtotime($u['data_criacao'])); ?></span>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Avaliações -->
+    <div class="modal fade modal-resumo" id="modal-avaliacoes" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-star me-2" style="color:#ffc107;"></i>Avaliações Recentes</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px;">
+                    <?php if (empty($ult_avaliacoes)): ?>
+                        <p style="text-align:center;color:#b3b3b3;">Nenhuma avaliação registrada.</p>
+                    <?php else: foreach ($ult_avaliacoes as $av): ?>
+                        <div class="resumo-row">
+                            <div class="resumo-row-icon"><i class="fas fa-music"></i></div>
+                            <div class="resumo-row-info">
+                                <strong><?php echo htmlspecialchars($av['titulo']); ?></strong>
+                                <small><?php echo htmlspecialchars($av['nome']); ?></small>
+                            </div>
+                            <span class="resumo-row-badge" style="color:#ffc107;"><?php echo str_repeat('★', (int)$av['nota']) . str_repeat('☆', 5 - (int)$av['nota']); ?></span>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Músicas -->
+    <div class="modal fade modal-resumo" id="modal-musicas" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-compact-disc me-2" style="color:#4fc3f7;"></i>Músicas Cadastradas Recentemente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px;">
+                    <?php if (empty($ult_musicas)): ?>
+                        <p style="text-align:center;color:#b3b3b3;">Nenhuma música cadastrada.</p>
+                    <?php else: foreach ($ult_musicas as $m): ?>
+                        <div class="resumo-row">
+                            <div class="resumo-row-icon"><i class="fas fa-music"></i></div>
+                            <div class="resumo-row-info">
+                                <strong><?php echo htmlspecialchars($m['titulo']); ?></strong>
+                                <small><?php echo htmlspecialchars($m['artista'] ?? 'Artista desconhecido'); ?></small>
+                            </div>
+                            <span class="resumo-row-badge">#<?php echo $m['id']; ?></span>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Usuários Premium -->
+    <div class="modal fade modal-resumo" id="modal-premium" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-crown me-2" style="color:#ffc107;"></i>Assinantes Premium Recentes</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px;">
+                    <?php if (empty($ult_premium)): ?>
+                        <p style="text-align:center;color:#b3b3b3;">Nenhum usuário premium.</p>
+                    <?php else: foreach ($ult_premium as $u): ?>
+                        <div class="resumo-row">
+                            <div class="resumo-row-icon"><i class="fas fa-crown" style="color:#ffc107;"></i></div>
+                            <div class="resumo-row-info">
+                                <strong><?php echo htmlspecialchars($u['nome']); ?></strong>
+                                <small>Assinante Premium</small>
+                            </div>
+                            <span class="resumo-row-badge"><?php echo date('d/m/Y', strtotime($u['data_criacao'])); ?></span>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer Slideshow -->
     <footer class="player">
@@ -343,6 +511,16 @@
             entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        function abrirResumo(tipo) {
+            const ids = {
+                'novos-usuarios': 'modal-novos-usuarios',
+                'avaliacoes':     'modal-avaliacoes',
+                'musicas':        'modal-musicas',
+                'premium':        'modal-premium'
+            };
+            new bootstrap.Modal(document.getElementById(ids[tipo])).show();
+        }
     </script>
 </body>
 </html>

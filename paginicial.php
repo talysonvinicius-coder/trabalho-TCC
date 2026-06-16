@@ -1,31 +1,91 @@
 <?php
 session_start();
-$musica_nova  = null;
+$musica_nova   = null;
+$musica_top    = null;
 $todas_musicas = [];
+$generos       = [];
 try {
     $pdo = new PDO('mysql:host=localhost;dbname=bdmusica;charset=utf8mb4', 'root', '');
 
     $stmt = $pdo->query("SELECT id, nome FROM genero WHERE status = 1");
     $generos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Busca todas as músicas ordenadas da mais recente para a mais antiga
     $stmt_todas = $pdo->query("
         SELECT m.id, m.titulo, m.spotify_link,
                COALESCE(a.nome, 'Artista desconhecido') AS artista,
-               al.nome AS album
+               al.nome AS album,
+               COUNT(av.id) AS total_avaliacoes,
+               ROUND(AVG(av.nota), 1) AS media_nota
         FROM musicas m
         LEFT JOIN artista a ON m.artista_id = a.id
         LEFT JOIN album al ON m.album_id = al.id
+        LEFT JOIN avaliacoes av ON av.musica_id = m.id
+        GROUP BY m.id, m.titulo, m.spotify_link, a.nome, al.nome
         ORDER BY m.id DESC
     ");
     $todas_musicas = $stmt_todas->fetchAll(PDO::FETCH_ASSOC);
     $musica_nova   = $todas_musicas[0] ?? null;
+
+    $stmt_top = $pdo->query("
+        SELECT m.id, m.titulo, m.spotify_link,
+               COALESCE(a.nome, 'Artista desconhecido') AS artista,
+               al.nome AS album,
+               COUNT(av.id)          AS total_avaliacoes,
+               ROUND(AVG(av.nota),1) AS media_nota
+        FROM avaliacoes av
+        JOIN musicas m  ON av.musica_id = m.id
+        LEFT JOIN artista a ON m.artista_id = a.id
+        LEFT JOIN album al  ON m.album_id   = al.id
+        GROUP BY m.id
+        ORDER BY total_avaliacoes DESC, media_nota DESC
+        LIMIT 1
+    ");
+    $musica_top = $stmt_top->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    // Top 3 artistas com mais avaliações
+    $stmt_artistas = $pdo->query("
+        SELECT a.id, a.nome,
+               COUNT(av.id) AS total_avaliacoes,
+               ROUND(AVG(av.nota), 1) AS media_nota
+        FROM artista a
+        JOIN musicas m ON m.artista_id = a.id
+        JOIN avaliacoes av ON av.musica_id = m.id
+        GROUP BY a.id, a.nome
+        ORDER BY total_avaliacoes DESC, media_nota DESC
+        LIMIT 3
+    ");
+    $top_artistas = $stmt_artistas->fetchAll(PDO::FETCH_ASSOC);
+
+    // Músicas de cada artista (com dados para abrirAvaliar)
+    $musicas_por_artista = [];
+    foreach ($top_artistas as $art) {
+        $stmt_m = $pdo->prepare("
+            SELECT m.id, m.titulo, m.spotify_link,
+                   COUNT(av.id) AS total_avaliacoes,
+                   ROUND(AVG(av.nota),1) AS media_nota
+            FROM musicas m
+            LEFT JOIN avaliacoes av ON av.musica_id = m.id
+            WHERE m.artista_id = :aid
+            GROUP BY m.id, m.titulo, m.spotify_link
+            ORDER BY total_avaliacoes DESC
+            LIMIT 5
+        ");
+        $stmt_m->execute(['aid' => $art['id']]);
+        $musicas_por_artista[$art['id']] = $stmt_m->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 } catch (PDOException $e) {
-    $generos = [];
     error_log($e->getMessage());
 }
 
 $notas_emoji = ['🎵','🎶','🎼','🎹','🥁','🎸','🎷','🎺','🎻','🪗'];
+
+function ratingBadge($total, $media) {
+    if ($total > 0) {
+        return '<div class="card-rating-badge tem-nota"><i class="fas fa-star" style="font-size:0.65rem;"></i>' . $media . '</div>';
+    }
+    return '<div class="card-rating-badge nova-musica">✦ Nova</div>';
+}
 
 // Extrai o videoId de qualquer formato de URL do YouTube
 function ytVideoId($url) {
@@ -155,6 +215,30 @@ function ytThumb($url) {
             padding: 2px 8px;
             border-radius: 10px;
         }
+        .card-rating-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
+        }
+        .card-rating-badge.tem-nota {
+            background: rgba(0,0,0,0.65);
+            color: #ffc107;
+            border: 1px solid rgba(255,193,7,0.3);
+        }
+        .card-rating-badge.nova-musica {
+            background: rgba(124,77,255,0.75);
+            color: #fff;
+            border: 1px solid rgba(124,77,255,0.4);
+        }
         .play-overlay {
             position: absolute;
             bottom: 70px;
@@ -189,6 +273,99 @@ function ytThumb($url) {
         .artist-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 50%; margin-bottom: 12px; }
         .artist-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
         .artist-card p  { font-size: 0.78rem; color: var(--text-muted-custom); margin: 0; }
+
+        /* Artist card com músicas */
+        .artist-full-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        .artist-full-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(124,77,255,0.4);
+            box-shadow: 0 12px 32px rgba(124,77,255,0.15);
+        }
+        .artist-full-header {
+            position: relative;
+            display: flex; align-items: center; gap: 14px;
+            padding: 20px 18px 16px;
+            background: linear-gradient(135deg, rgba(124,77,255,0.12), rgba(79,195,247,0.06));
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .artist-full-rank {
+            position: absolute; top: 12px; right: 14px;
+            font-size: 0.68rem; font-weight: 800;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .artist-full-avatar {
+            width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #7c4dff, #4fc3f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800; color: #fff;
+            box-shadow: 0 4px 14px rgba(124,77,255,0.4);
+        }
+        .artist-full-info h4 { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
+        .artist-full-info .artist-stats {
+            display: flex; gap: 10px; align-items: center;
+        }
+        .artist-stats-nota {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: rgba(255,193,7,0.12); border: 1px solid rgba(255,193,7,0.25);
+            border-radius: 20px; padding: 2px 8px;
+            font-size: 0.7rem; font-weight: 700; color: #ffc107;
+        }
+        .artist-stats-total {
+            font-size: 0.7rem; color: #b3b3b3;
+        }
+        .artist-musicas-label {
+            padding: 8px 18px 6px;
+            font-size: 0.68rem; font-weight: 700;
+            color: #555; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .artist-musica-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 18px; cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+        }
+        .artist-musica-row:last-child { border-bottom: none; }
+        .artist-musica-row:hover { background: rgba(124,77,255,0.1); }
+        .artist-musica-num {
+            width: 18px; font-size: 0.72rem; color: #555;
+            text-align: right; flex-shrink: 0; transition: opacity 0.15s;
+        }
+        .artist-musica-row:hover .artist-musica-num { opacity: 0; }
+        .artist-musica-play {
+            position: absolute; left: 18px;
+            width: 18px; text-align: center;
+            color: #7c4dff; font-size: 0.75rem;
+            opacity: 0; transition: opacity 0.15s;
+        }
+        .artist-musica-row:hover .artist-musica-play { opacity: 1; }
+        .artist-musica-thumb {
+            width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .artist-musica-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .artist-musica-info { flex: 1; min-width: 0; }
+        .artist-musica-info strong {
+            display: block; font-size: 0.83rem; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .artist-musica-info small { color: #b3b3b3; font-size: 0.7rem; }
+        .artist-musica-nota {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 0.7rem; color: #ffc107; white-space: nowrap;
+            flex-shrink: 0; font-weight: 700;
+        }
 
         /* Genre Cards */
         .genre-card {
@@ -250,6 +427,45 @@ function ytThumb($url) {
             border: none; color: #fff; border-radius: 25px; padding: 10px 0;
             font-weight: 700; width: 100%; font-size: 0.95rem; transition: filter 0.2s; }
         .btn-avaliar-enviar:hover { filter: brightness(1.15); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Abas do modal */
+        .av-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 16px; }
+        .av-tab {
+            flex: 1; padding: 10px 0; text-align: center; font-size: 0.82rem; font-weight: 600;
+            color: #b3b3b3; cursor: pointer; border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s; user-select: none;
+        }
+        .av-tab.ativa { color: #fff; border-bottom-color: #7c4dff; }
+        .av-tab:hover:not(.ativa) { color: #ddd; }
+        .av-panel { display: none; }
+        .av-panel.ativa { display: block; }
+
+        /* Comentários da música */
+        .av-comentario-item {
+            display: flex; gap: 10px; padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .av-comentario-item:last-child { border-bottom: none; }
+        .av-comentario-avatar {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #7c4dff, #4fc3f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; overflow: hidden;
+        }
+        .av-comentario-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .av-comentario-corpo { flex: 1; min-width: 0; }
+        .av-comentario-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .av-comentario-topo strong { font-size: 0.8rem; }
+        .av-comentario-nota { color: #ffc107; font-size: 0.72rem; }
+        .av-comentario-texto { font-size: 0.8rem; color: #ccc; line-height: 1.4; margin: 0; }
+        .av-comentario-data { font-size: 0.7rem; color: #666; margin-top: 3px; display: block; }
+        .av-sem-comentarios {
+            text-align: center; padding: 24px 16px;
+            color: #555;
+        }
+        .av-sem-comentarios i { font-size: 2rem; display: block; margin-bottom: 8px; color: #333; }
+        .av-sem-comentarios p { font-size: 0.82rem; margin: 0; }
     </style>
 </head>
 <body>
@@ -275,22 +491,45 @@ function ytThumb($url) {
     </header>
 
     <!-- Banner destaque -->
+    <?php if ($musica_top): ?>
+    <?php $thumb_top = ytThumb($musica_top['spotify_link']); ?>
     <div class="featured-banner mb-4 fade-in">
         <div class="featured-info">
-            <span class="featured-tag">🔥 Avaliações em alta</span>
-            <h1>Midnight City</h1>
-            <p>M83 • Álbum: Hurry Up, We're Dreaming</p>
+            <span class="featured-tag">🔥 Mais avaliada</span>
+            <h1><?php echo htmlspecialchars($musica_top['titulo']); ?></h1>
+            <p><?php echo htmlspecialchars($musica_top['artista']); ?>
+                <?php echo !empty($musica_top['album']) ? ' • ' . htmlspecialchars($musica_top['album']) : ''; ?>
+                &nbsp;<span class="score-badge" style="font-size:0.85rem;padding:3px 10px;">★ <?php echo $musica_top['media_nota']; ?></span>
+                <span style="font-size:0.78rem;color:#b3b3b3;margin-left:6px;"><?php echo $musica_top['total_avaliacoes']; ?> avaliações</span>
+            </p>
             <div class="d-flex gap-2 mt-3">
-                <button class="btn-play-featured" data-bs-toggle="modal" data-bs-target="#modalComentario">
-                    <i class="fas fa-comment me-2"></i>Comentar
+                <button class="btn-play-featured"
+                    onclick="abrirAvaliar('<?php echo $musica_top['id']; ?>','top','<?php echo addslashes(htmlspecialchars($musica_top['titulo'])); ?>','<?php echo addslashes(htmlspecialchars($musica_top['artista'])); ?>','<?php echo addslashes(htmlspecialchars($musica_top['spotify_link'] ?? '')); ?>')">
+                    <i class="fas fa-star me-2"></i>Avaliar
                 </button>
                 <button class="btn-like-featured" id="btn-curtir" onclick="toggleCurtir(this)">
                     <i class="far fa-heart me-2"></i>Curtir
                 </button>
             </div>
         </div>
-        <img src="https://picsum.photos/seed/music1/400/220" alt="Destaque" class="featured-img">
+        <?php if ($thumb_top): ?>
+            <img src="<?php echo $thumb_top; ?>" alt="<?php echo htmlspecialchars($musica_top['titulo']); ?>" class="featured-img">
+        <?php else: ?>
+            <div class="featured-img" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:4rem;">🎵</div>
+        <?php endif; ?>
     </div>
+    <?php else: ?>
+    <div class="featured-banner mb-4 fade-in" style="justify-content:center;text-align:center;flex-direction:column;gap:12px;padding:48px 40px;">
+        <span style="font-size:3rem;">&#127926;</span>
+        <h2 style="font-size:1.5rem;font-weight:800;margin:0;">Teremos mais atualizações em breve</h2>
+        <p style="color:#b3b3b3;margin:0;">Seja o primeiro a avaliar uma música e aparecer aqui!</p>
+        <div class="d-flex gap-2 justify-content-center mt-2">
+            <a href="genero.php?id=2" class="btn-play-featured" style="text-decoration:none;">
+                <i class="fas fa-music me-2"></i>Explorar músicas
+            </a>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Categorias -->
     <section class="mb-5 fade-in">
@@ -334,6 +573,7 @@ function ytThumb($url) {
                     <?php else: ?>
                         <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3.5rem;"><?php echo $emoji; ?></div>
                     <?php endif; ?>
+                    <?php echo ratingBadge($m['total_avaliacoes'], $m['media_nota']); ?>
                     <button class="play-overlay"><i class="fas fa-play"></i></button>
                     <div class="card-body">
                         <?php if ($i === 0): ?>
@@ -368,6 +608,7 @@ function ytThumb($url) {
                     <?php else: ?>
                         <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:2.5rem;"><?php echo $emoji; ?></div>
                     <?php endif; ?>
+                    <?php echo ratingBadge($m['total_avaliacoes'], $m['media_nota']); ?>
                     <button class="play-overlay"><i class="fas fa-play"></i></button>
                     <div class="card-body">
                         <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
@@ -385,84 +626,68 @@ function ytThumb($url) {
     <!-- Artistas Recomendados -->
     <section class="mb-5 fade-in">
         <div class="section-header">
-            <h2>Artistas Recomendados</h2>
-            <a href="#" class="see-all" data-bs-toggle="modal" data-bs-target="#modalArtistas">Ver tudo</a>
+            <h2>Artistas em Destaque</h2>
         </div>
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-            <?php
-            $artistas = [
-                ['seed' => 'art1', 'nome' => 'The Weeknd'],
-                ['seed' => 'art2', 'nome' => 'Tame Impala'],
-                ['seed' => 'art3', 'nome' => 'Dua Lipa'],
-            ];
-            foreach ($artistas as $a): ?>
+        <?php if (empty($top_artistas)): ?>
+            <p style="color:#b3b3b3;">Nenhum artista com avaliações ainda.</p>
+        <?php else: ?>
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+            <?php foreach ($top_artistas as $art):
+                $musicas_art = $musicas_por_artista[$art['id']] ?? [];
+                $inicial = strtoupper(mb_substr($art['nome'], 0, 1));
+            ?>
             <div class="col">
-                <div class="artist-card" onclick="abrirArtista('<?php echo $a['seed']; ?>','<?php echo addslashes($a['nome']); ?>')">
-                    <img src="https://picsum.photos/seed/<?php echo $a['seed']; ?>/200" alt="<?php echo $a['nome']; ?>">
-                    <h4><?php echo $a['nome']; ?></h4>
-                    <p><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
+                <div class="artist-full-card">
+                    <div class="artist-full-header">
+                        <div class="artist-full-avatar"><?php echo $inicial; ?></div>
+                        <div class="artist-full-info">
+                            <h4><?php echo htmlspecialchars($art['nome']); ?></h4>
+                            <span>
+                                <i class="fas fa-star" style="color:#ffc107;font-size:0.65rem;"></i>
+                                <?php echo $art['media_nota']; ?> &nbsp;&bull;&nbsp;
+                                <?php echo $art['total_avaliacoes']; ?> avaliações
+                            </span>
+                        </div>
+                    </div>
+                    <?php if (empty($musicas_art)): ?>
+                        <p style="padding:16px;color:#b3b3b3;font-size:0.82rem;margin:0;">Nenhuma música disponível.</p>
+                    <?php else: foreach ($musicas_art as $i => $m):
+                        $thumb = ytThumb($m['spotify_link']);
+                        $emoji = $notas_emoji[$i % count($notas_emoji)];
+                    ?>
+                    <div class="artist-musica-row"
+                         onclick="abrirAvaliar(
+                             '<?php echo $m['id']; ?>',
+                             'art<?php echo $art['id']; ?>m<?php echo $m['id']; ?>',
+                             '<?php echo addslashes(htmlspecialchars($m['titulo'])); ?>',
+                             '<?php echo addslashes(htmlspecialchars($art['nome'])); ?>',
+                             '<?php echo addslashes(htmlspecialchars($m['spotify_link'] ?? '')); ?>'
+                         )">
+                        <span class="artist-musica-num"><?php echo $i + 1; ?></span>
+                        <span class="artist-musica-play"><i class="fas fa-play"></i></span>
+                        <div class="artist-musica-thumb">
+                            <?php if ($thumb): ?>
+                                <img src="<?php echo $thumb; ?>" alt="">
+                            <?php else: ?>
+                                <?php echo $emoji; ?>
+                            <?php endif; ?>
+                        </div>
+                        <div class="artist-musica-info">
+                            <strong><?php echo htmlspecialchars($m['titulo']); ?></strong>
+                            <small><?php echo $m['total_avaliacoes']; ?> avaliações</small>
+                        </div>
+                        <?php if ($m['media_nota']): ?>
+                        <span class="artist-musica-nota">★ <?php echo $m['media_nota']; ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>
         </div>
+        <?php endif; ?>
     </section>
 </main>
-
-<!-- Modal Artista -->
-<div class="modal fade" id="modalArtista" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
-        <div class="modal-content" style="background:rgba(15,15,25,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:#fff;">
-            <div class="modal-header border-0 pb-0">
-                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body pt-0 px-4 pb-4">
-                <!-- Foto centralizada -->
-                <div class="text-center mb-3">
-                    <img id="art-foto" src="" alt="" style="width:180px;height:180px;border-radius:12px;object-fit:cover;box-shadow:0 4px 24px rgba(0,0,0,0.4);">
-                    <h4 id="art-nome" class="mt-3 mb-0 fw-bold"></h4>
-                    <p style="font-size:0.78rem;color:#b3b3b3;"><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
-                </div>
-                <!-- Músicas -->
-                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Músicas populares</p>
-                <div id="art-musicas" class="mb-4"></div>
-                <!-- Álbuns -->
-                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;text-transform:uppercase;letter-spacing:1px;">Álbuns</p>
-                <div id="art-albuns" class="d-flex gap-3 flex-wrap"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Ver Tudo - Artistas Recomendados -->
-<div class="modal fade" id="modalArtistas" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content" style="background:#0a0a0a; color:#fff;">
-            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                <h5 class="modal-title fw-bold"><i class="fas fa-microphone me-2" style="color:#7c4dff;"></i>Artistas Recomendados</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="overflow-y:auto;">
-                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
-                    <?php
-                    $artistasAll = [
-                        ['seed' => 'art1', 'nome' => 'The Weeknd'],
-                        ['seed' => 'art2', 'nome' => 'Tame Impala'],
-                        ['seed' => 'art3', 'nome' => 'Dua Lipa'],
-                    ];
-                    foreach ($artistasAll as $a): ?>
-                    <div class="col">
-                        <div class="artist-card">
-                            <img src="https://picsum.photos/seed/<?php echo $a['seed']; ?>/200" alt="<?php echo $a['nome']; ?>">
-                            <h4><?php echo $a['nome']; ?></h4>
-                            <p><i class="fas fa-circle-check text-success me-1" style="font-size:.7rem"></i>Artista Verificado</p>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal Ver Tudo - Adicionadas Recentemente -->
 <div class="modal fade" id="modalAvaliadasRecente" tabindex="-1">
@@ -485,6 +710,7 @@ function ytThumb($url) {
                             <?php else: ?>
                                 <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
                             <?php endif; ?>
+                            <?php echo ratingBadge($m['total_avaliacoes'], $m['media_nota']); ?>
                             <button class="play-overlay"><i class="fas fa-play"></i></button>
                             <div class="card-body">
                                 <?php if ($i === 0): ?>
@@ -523,6 +749,7 @@ function ytThumb($url) {
                             <?php else: ?>
                                 <div style="width:100%;aspect-ratio:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:3rem;"><?php echo $emoji; ?></div>
                             <?php endif; ?>
+                            <?php echo ratingBadge($m['total_avaliacoes'], $m['media_nota']); ?>
                             <button class="play-overlay"><i class="fas fa-play"></i></button>
                             <div class="card-body">
                                 <h4 title="<?php echo htmlspecialchars($m['titulo']); ?>"><?php echo htmlspecialchars($m['titulo']); ?></h4>
@@ -550,41 +777,48 @@ function ytThumb($url) {
                 <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="padding:20px;">
-                <!-- Player YouTube ou Premium Lock -->
-                <?php if (!$isPremium): ?>
-                    <div class="premium-locked-banner" style="text-align: center; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px dashed #ffc107; margin-bottom: 16px;">
-                        <i class="fas fa-lock" style="font-size: 1.8rem; color: #ffc107; margin-bottom: 10px;"></i>
-                        <h6 style="color: #fff; font-weight: 700; margin-bottom: 5px;">Funcionalidade Premium</h6>
-                        <p style="color: #b3b3b3; margin-bottom: 15px; font-size: 0.8rem;">Ouvir as músicas requer uma assinatura Premium.</p>
-                        <a href="premium.php" class="btn-upgrade" style="display: inline-block; padding: 6px 16px; background: #ffc107; color: #000; text-decoration: none; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">Fazer Upgrade</a>
-                    </div>
-                <?php else: ?>
-                    <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
-                        <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                    </div>
-                    <div id="yt-no-video" class="yt-no-video" style="display:none;">
-                        <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
-                    </div>
-                <?php endif; ?>
-
-                <!-- Estrelas -->
-                <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Sua nota</p>
-                <div class="star-rating mb-3" id="stars">
-                    <span data-v="1">&#9733;</span>
-                    <span data-v="2">&#9733;</span>
-                    <span data-v="3">&#9733;</span>
-                    <span data-v="4">&#9733;</span>
-                    <span data-v="5">&#9733;</span>
+                <!-- Abas -->
+                <div class="av-tabs">
+                    <div class="av-tab ativa" onclick="trocarAba('avaliar')"><i class="fas fa-star me-1"></i>Avaliar</div>
+                    <div class="av-tab" onclick="trocarAba('comentarios')"><i class="fas fa-comments me-1"></i>Comentários</div>
                 </div>
-                <!-- Avaliação JS data -->
-                <input type="hidden" id="av-musica-id" value="">
-                
-                <!-- Comentário -->
-                <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
-                <textarea id="av-comentario" class="comentario-textarea" rows="3"
-                    placeholder="Ex: Uma das melhores músicas dos anos 90, marcante e poderosa..."></textarea>
-                <button class="btn-avaliar-enviar mt-3" id="btn-enviar-av" onclick="enviarAvaliacao()">Enviar Avaliação</button>
-                <div id="av-msg" class="mt-2 text-center" style="font-size:0.85rem; display:none;"></div>
+
+                <!-- Painel Avaliar -->
+                <div class="av-panel ativa" id="painel-avaliar">
+                    <!-- Player YouTube ou Free/Premium -->
+                    <?php if (!$isPremium): ?>
+                        <div id="free-video-block" style="margin-bottom:16px;"></div>
+                    <?php else: ?>
+                        <div id="yt-player-wrap" class="yt-player-wrap" style="display:none;">
+                            <iframe id="yt-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                        </div>
+                        <div id="yt-no-video" class="yt-no-video" style="display:none;">
+                            <i class="fas fa-music mb-2" style="font-size:1.4rem;"></i><br>Prévia não disponível para esta música.
+                        </div>
+                    <?php endif; ?>
+                    <p class="mb-1" style="font-size:0.8rem;color:#b3b3b3;">Sua nota</p>
+                    <div class="star-rating mb-3" id="stars">
+                        <span data-v="1">&#9733;</span><span data-v="2">&#9733;</span>
+                        <span data-v="3">&#9733;</span><span data-v="4">&#9733;</span>
+                        <span data-v="5">&#9733;</span>
+                    </div>
+                    <input type="hidden" id="av-musica-id" value="">
+                    <p class="mb-2" style="font-size:0.8rem;color:#b3b3b3;">Comentário</p>
+                    <textarea id="av-comentario" class="comentario-textarea" rows="3"
+                        placeholder="Ex: Uma das melhores músicas dos anos 90, marcante e poderosa..."></textarea>
+                    <button class="btn-avaliar-enviar mt-3" id="btn-enviar-av" onclick="enviarAvaliacao()">Enviar Avaliação</button>
+                    <div id="av-msg" class="mt-2 text-center" style="font-size:0.85rem; display:none;"></div>
+                </div>
+
+                <!-- Painel Comentários -->
+                <div class="av-panel" id="painel-comentarios">
+                    <div id="av-lista-comentarios">
+                        <div class="av-sem-comentarios">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Carregando...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -700,43 +934,56 @@ function ytThumb($url) {
     });
     function toggleChip(el) { el.classList.toggle('selected'); }
 
-    const artistaData = {
-        'art1': {
-            musicas: ['Blinding Lights','Starboy','Save Your Tears','Die For You','The Hills'],
-            albuns:  [{seed:'alb1',nome:'After Hours'},{seed:'alb2',nome:'Starboy'},{seed:'alb3',nome:'Kiss Land'}]
-        },
-        'art2': {
-            musicas: ['The Less I Know The Better','Feels Like We Only Go Backwards','Let It Happen','Eventually','New Person'],
-            albuns:  [{seed:'alb4',nome:'Currents'},{seed:'alb5',nome:'Lonerism'},{seed:'alb6',nome:'Innerspeaker'}]
-        },
-        'art3': {
-            musicas: ['Levitating','Don\'t Start Now','Physical','Break My Heart','New Rules'],
-            albuns:  [{seed:'alb7',nome:'Future Nostalgia'},{seed:'alb8',nome:'Radical Optimism'},{seed:'alb9',nome:'Dua Lipa'}]
-        }
-    };
-    function abrirArtista(seed, nome) {
-        const d = artistaData[seed] || { musicas: [], albuns: [] };
-        document.getElementById('art-foto').src = 'https://picsum.photos/seed/' + seed + '/200';
-        document.getElementById('art-nome').textContent = nome;
-        document.getElementById('art-musicas').innerHTML = d.musicas.map((m, i) =>
-            `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <span style="color:#b3b3b3;font-size:0.8rem;width:16px;text-align:right;">${i+1}</span>
-                <i class="fas fa-music" style="color:#7c4dff;font-size:0.75rem;"></i>
-                <span style="font-size:0.88rem;">${m}</span>
-            </div>`
-        ).join('');
-        document.getElementById('art-albuns').innerHTML = d.albuns.map(a =>
-            `<div style="text-align:center;width:90px;">
-                <img src="https://picsum.photos/seed/${a.seed}/200" style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-bottom:6px;">
-                <p style="font-size:0.72rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.nome}</p>
-            </div>`
-        ).join('');
-        new bootstrap.Modal(document.getElementById('modalArtista')).show();
-    }
     function extrairVideoId(url) {
         if (!url) return null;
         const m = url.match(/(?:youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/);
         return m ? m[1] : null;
+    }
+
+    // Abas do modal
+    function trocarAba(aba) {
+        document.querySelectorAll('.av-tab').forEach((t, i) => {
+            t.classList.toggle('ativa', (i === 0 && aba === 'avaliar') || (i === 1 && aba === 'comentarios'));
+        });
+        document.getElementById('painel-avaliar').classList.toggle('ativa', aba === 'avaliar');
+        document.getElementById('painel-comentarios').classList.toggle('ativa', aba === 'comentarios');
+        if (aba === 'comentarios') carregarComentariosMusica();
+    }
+
+    async function carregarComentariosMusica() {
+        const musicaId = document.getElementById('av-musica-id').value;
+        const lista = document.getElementById('av-lista-comentarios');
+        lista.innerHTML = '<div class="av-sem-comentarios"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>';
+
+        const res = await fetch('api/avaliacoes/comentarios.php?musica_id=' + musicaId).catch(() => null);
+        const data = res ? await res.json() : null;
+
+        if (!data?.ok || !data.comentarios.length) {
+            lista.innerHTML = `
+                <div class="av-sem-comentarios">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>Nenhum comentário recente</p>
+                </div>`;
+            return;
+        }
+
+        lista.innerHTML = data.comentarios.map(c => {
+            const avatar = c.foto ? `<img src="${c.foto}" alt="">` : c.nome.charAt(0).toUpperCase();
+            const estrelas = '★'.repeat(Math.round(c.nota)) + '☆'.repeat(5 - Math.round(c.nota));
+            const data_fmt = new Date(c.data_avaliacao).toLocaleDateString('pt-BR');
+            return `
+            <div class="av-comentario-item">
+                <div class="av-comentario-avatar">${avatar}</div>
+                <div class="av-comentario-corpo">
+                    <div class="av-comentario-topo">
+                        <strong>${c.nome}</strong>
+                        <span class="av-comentario-nota">${estrelas}</span>
+                    </div>
+                    <p class="av-comentario-texto">“${c.comentario}”</p>
+                    <span class="av-comentario-data">${data_fmt}</span>
+                </div>
+            </div>`;
+        }).join('');
     }
 
     function abrirAvaliar(musicaId, seed, titulo, artista, youtubeUrl) {
@@ -747,12 +994,49 @@ function ytThumb($url) {
         document.getElementById('av-comentario').value = '';
         document.getElementById('av-msg').style.display = 'none';
         document.querySelectorAll('#stars span').forEach(s => s.classList.remove('active'));
+        trocarAba('avaliar'); // sempre abre na aba avaliar
 
         const videoId = extrairVideoId(youtubeUrl);
+
+        // Atualiza capa com thumbnail do YouTube
+        if (videoId) document.getElementById('av-capa').src = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+
+        // Bloco free: botão YouTube ou mensagem indisponível
+        const freeBlock = document.getElementById('free-video-block');
+        if (freeBlock) {
+            if (videoId) {
+                freeBlock.innerHTML = `
+                    <div style="border-radius:12px;overflow:hidden;position:relative;margin-bottom:4px;">
+                        <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg"
+                             style="width:100%;display:block;border-radius:12px;filter:brightness(0.45);">
+                        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+                            <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener"
+                               style="display:inline-flex;align-items:center;gap:8px;background:#ff0000;color:#fff;font-weight:700;font-size:0.88rem;padding:10px 22px;border-radius:25px;text-decoration:none;transition:filter 0.2s;box-shadow:0 4px 16px rgba(255,0,0,0.4);"
+                               onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">
+                                <i class="fab fa-youtube" style="font-size:1.1rem;"></i> Assistir no YouTube
+                            </a>
+                            <a href="premium.php"
+                               style="font-size:0.75rem;color:#ffc107;text-decoration:none;opacity:0.85;">
+                                <i class="fas fa-bolt me-1"></i>Assine o Premium para assistir aqui
+                            </a>
+                        </div>
+                    </div>`;
+            } else {
+                freeBlock.innerHTML = `
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:22px;text-align:center;margin-bottom:4px;">
+                        <i class="fas fa-compact-disc" style="font-size:2rem;color:#555;display:block;margin-bottom:10px;animation:spin 4s linear infinite;"></i>
+                        <p style="color:#b3b3b3;font-size:0.85rem;margin:0 0 12px;font-weight:600;">Música indisponível no momento</p>
+                        <a href="premium.php" style="font-size:0.75rem;color:#ffc107;text-decoration:none;">
+                            <i class="fas fa-bolt me-1"></i>Upgrade para mais conteúdo
+                        </a>
+                    </div>`;
+            }
+        }
+
+        // Bloco premium: player
         const playerWrap = document.getElementById('yt-player-wrap');
         const noVideo    = document.getElementById('yt-no-video');
         const iframe     = document.getElementById('yt-iframe');
-
         if (playerWrap && noVideo && iframe) {
             if (videoId) {
                 iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';

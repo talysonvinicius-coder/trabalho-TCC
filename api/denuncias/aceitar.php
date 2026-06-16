@@ -28,8 +28,13 @@ try {
     // Iniciar transação
     $pdo->beginTransaction();
     
-    // Buscar informações da denúncia
-    $stmt = $pdo->prepare("SELECT comentario_id FROM denuncias WHERE id = ?");
+    // Buscar e salvar o conteúdo do comentário antes de deletar
+    $stmt = $pdo->prepare("
+        SELECT d.comentario_id, c.conteudo, c.usuario_id
+        FROM denuncias d
+        LEFT JOIN comentarios c ON d.comentario_id = c.id
+        WHERE d.id = ?
+    ");
     $stmt->execute([$data['denuncia_id']]);
     $denuncia = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -37,6 +42,12 @@ try {
         $pdo->rollBack();
         echo json_encode(['sucesso' => false, 'mensagem' => 'Denúncia não encontrada']);
         exit;
+    }
+    
+    // Salvar conteúdo na denúncia antes de deletar
+    if ($denuncia['conteudo']) {
+        $stmt = $pdo->prepare("UPDATE denuncias SET conteudo_comentario = ? WHERE id = ?");
+        $stmt->execute([$denuncia['conteudo'], $data['denuncia_id']]);
     }
     
     // Deletar o comentário denunciado

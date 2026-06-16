@@ -157,6 +157,9 @@ if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
             try {
                 $pdo = Conexao::getConexao();
 
+                // Garantir coluna conteudo_comentario existe
+                $pdo->exec("ALTER TABLE denuncias ADD COLUMN IF NOT EXISTS conteudo_comentario TEXT NULL DEFAULT NULL");
+
                 $filtro = $_GET['filtro'] ?? 'pendentes';
                 $whereClause = match($filtro) {
                     'aceitas'    => "WHERE d.status = 'Resolvida'",
@@ -164,24 +167,19 @@ if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
                     'todas'      => '',
                     default      => "WHERE d.status = 'Pendente'",
                 };
-                $statusBadgeClass = match($filtro) {
-                    'aceitas'    => 'status-aceita',
-                    'rejeitadas' => 'status-rejeitada',
-                    default      => 'status-pendente',
-                };
 
                 $query = "
-                    SELECT d.id, d.motivo, d.status, d.data_denuncia,
+                    SELECT d.id, d.motivo, d.status, d.data_denuncia, d.conteudo_comentario,
                            c.conteudo, c.data_comentario,
-                           u_comentario.id as usuario_comentario_id,
-                           u_comentario.nome as usuario_comentario_nome,
-                           l.email as usuario_email,
-                           u_denuncia.nome as usuario_denuncia_nome
+                           u_comentario.id   AS usuario_comentario_id,
+                           u_comentario.nome AS usuario_comentario_nome,
+                           l.email           AS usuario_email,
+                           u_denuncia.nome   AS usuario_denuncia_nome
                     FROM denuncias d
-                    INNER JOIN comentarios c ON d.comentario_id = c.id
-                    INNER JOIN usuario u_comentario ON c.usuario_id = u_comentario.id
-                    INNER JOIN login l ON u_comentario.id = l.usuario_id
-                    INNER JOIN usuario u_denuncia ON d.usuario_id = u_denuncia.id
+                    LEFT JOIN comentarios c       ON d.comentario_id = c.id
+                    LEFT JOIN usuario u_comentario ON c.usuario_id = u_comentario.id
+                    LEFT JOIN login l              ON u_comentario.id = l.usuario_id
+                    INNER JOIN usuario u_denuncia  ON d.usuario_id = u_denuncia.id
                     $whereClause
                     ORDER BY d.data_denuncia DESC
                 ";
@@ -189,33 +187,54 @@ if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
 
                 if (count($denuncias) > 0):
                     foreach ($denuncias as $d):
-                        $letra = strtoupper(mb_substr($d['usuario_comentario_nome'], 0, 1));
-                        $dataFormatada = date('d/m/Y H:i', strtotime($d['data_denuncia']));
+                        // Texto do comentário: usa o salvo se o original foi deletado
+                        $textoComentario = $d['conteudo'] ?? $d['conteudo_comentario'] ?? null;
+                        $nomeAutor       = $d['usuario_comentario_nome'] ?? '[usuário removido]';
+                        $emailAutor      = $d['usuario_email'] ?? '';
+                        $letra           = strtoupper(mb_substr($nomeAutor, 0, 1));
+                        $dataFormatada   = date('d/m/Y H:i', strtotime($d['data_denuncia']));
+                        $isPendente      = $d['status'] === 'Pendente';
                         $badgeClass = match($d['status']) {
                             'Resolvida' => 'status-aceita',
                             'Rejeitada' => 'status-rejeitada',
                             default     => 'status-pendente',
+                        };
+                        $statusLabel = match($d['status']) {
+                            'Resolvida' => 'Aceita',
+                            'Rejeitada' => 'Rejeitada',
+                            default     => 'Pendente',
                         };
             ?>
             <div class="denuncia-card" data-status="<?php echo htmlspecialchars($d['status']); ?>">
                 <div class="denuncia-header">
                     <div class="d-flex align-items-center gap-2">
                         <span class="denuncia-id">#<?php echo $d['id']; ?></span>
-                        <span class="status-badge <?php echo $badgeClass; ?>"><?php echo htmlspecialchars($d['status']); ?></span>
+                        <span class="status-badge <?php echo $badgeClass; ?>"><?php echo $statusLabel; ?></span>
+                        <?php if (!$isPendente && $d['status'] === 'Resolvida'): ?>
+                            <span style="font-size:0.72rem;color:#b3b3b3;"><i class="fas fa-trash-alt me-1"></i>Comentário removido</span>
+                        <?php endif; ?>
                     </div>
                     <span class="badge-motivo"><i class="fas fa-flag me-1"></i><?php echo htmlspecialchars($d['motivo'] ?? 'Sem motivo'); ?></span>
                 </div>
 
-                <div class="comentario-denunciado">
+                <div class="comentario-denunciado" <?php if ($d['status'] === 'Resolvida'): ?>style="opacity:0.6;border-left-color:#ef5350;"<?php endif; ?>>
                     <div class="usuario-info">
                         <div class="usuario-avatar"><?php echo $letra; ?></div>
                         <div>
-                            <span class="usuario-nome"><?php echo htmlspecialchars($d['usuario_comentario_nome']); ?></span>
-                            <span class="usuario-email"><?php echo htmlspecialchars($d['usuario_email']); ?></span>
+                            <span class="usuario-nome"><?php echo htmlspecialchars($nomeAutor); ?></span>
+                            <span class="usuario-email"><?php echo htmlspecialchars($emailAutor); ?></span>
                         </div>
                     </div>
-                    <div class="conteudo-comentario"><?php echo htmlspecialchars($d['conteudo']); ?></div>
-                    <div class="data-info"><i class="fas fa-calendar-alt me-1"></i>Comentado em: <?php echo date('d/m/Y H:i', strtotime($d['data_comentario'])); ?></div>
+                    <?php if ($textoComentario): ?>
+                        <div class="conteudo-comentario"><?php echo htmlspecialchars($textoComentario); ?></div>
+                    <?php else: ?>
+                        <div class="conteudo-comentario" style="color:#b3b3b3;font-style:italic;">Conteúdo do comentário não disponível.</div>
+                    <?php endif; ?>
+                    <div class="data-info">
+                        <?php if ($d['data_comentario']): ?>
+                            <i class="fas fa-calendar-alt me-1"></i>Comentado em: <?php echo date('d/m/Y H:i', strtotime($d['data_comentario'])); ?>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="motivo-denuncia">
@@ -229,14 +248,16 @@ if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
                     <i class="fas fa-calendar-alt me-1"></i><?php echo $dataFormatada; ?>
                 </div>
 
+                <?php if ($isPendente): ?>
                 <div class="acoes-denuncia">
                     <button class="btn-rejeitar" onclick="rejeitarDenuncia(<?php echo $d['id']; ?>)">
                         <i class="fas fa-times"></i>Rejeitar
                     </button>
-                    <button class="btn-aceitar" onclick="aceitarDenuncia(<?php echo $d['id']; ?>, <?php echo $d['usuario_comentario_id']; ?>)">
+                    <button class="btn-aceitar" onclick="aceitarDenuncia(<?php echo $d['id']; ?>, <?php echo $d['usuario_comentario_id'] ?? 0; ?>)">
                         <i class="fas fa-check"></i>Aceitar
                     </button>
                 </div>
+                <?php endif; ?>
             </div>
             <?php
                     endforeach;
@@ -244,8 +265,8 @@ if (empty($_SESSION['logado']) || $_SESSION['perfil'] !== 'admin') {
             ?>
             <div class="sem-denuncias">
                 <i class="fas fa-check-circle"></i>
-                <h3>Nenhuma denúncia pendente</h3>
-                <p>Não há denúncias aguardando revisão no momento.</p>
+                <h3>Nenhuma denúncia encontrada</h3>
+                <p>Não há denúncias nesta categoria no momento.</p>
             </div>
             <?php
                 endif;
