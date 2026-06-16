@@ -48,9 +48,10 @@ class ListasDAO {
     public function listarMusicasDaLista($listaId) {
         $pdo = Conexao::getConexao();
         $stmt = $pdo->prepare("
-            SELECT m.*, m.artista as artista_nome 
+            SELECT m.*, a.nome as artista_nome 
             FROM musicas m 
             JOIN lista_musicas lm ON m.id = lm.musica_id 
+            LEFT JOIN artista a ON m.artista_id = a.id
             WHERE lm.lista_id = ?
         ");
         $stmt->execute([$listaId]);

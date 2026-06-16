@@ -23,10 +23,10 @@ $stmt = $pdo->prepare("
     JOIN perfil p  ON u.perfil_id = p.id
     JOIN planos pl ON u.plano_id  = pl.id
     LEFT JOIN login l ON l.usuario_id = u.id
-    WHERE u.nome = :nome
+    WHERE u.id = :id
     LIMIT 1
 ");
-$stmt->execute(['nome' => $_SESSION['nome']]);
+$stmt->execute(['id' => $_SESSION['id']]);
 $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$usuario) {
@@ -124,7 +124,7 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
         .profile-header {
             padding: 0 32px 24px;
             display: flex; align-items: flex-end; gap: 24px;
-            margin-top: -60px; position: relative; z-index: 1;
+            margin-top: 40px; position: relative; z-index: 1;
         }
 
         .profile-avatar {
@@ -329,8 +329,6 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
 
 <main class="content">
 
-    <div class="profile-cover"></div>
-
     <div class="profile-header fade-in">
         <div class="profile-avatar" onclick="document.getElementById('modalEditarPerfil') && new bootstrap.Modal(document.getElementById('modalEditarPerfil')).show()">
             <?php if (!empty($usuario['foto'])): ?>
@@ -341,8 +339,6 @@ $notas_comentario = ['🎧', '🎵', '🎶', '🎤', '🎼', '🎸'];
             <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
         </div>
         <div class="profile-info">
-            <h1 id="profile-name">Carregando...</h1>
-            <p class="profile-username" id="profile-username" style="margin-bottom: 8px;">@usuario</p>
             <?php if ($isPremium): ?>
                 <span style="font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:20px; background:linear-gradient(135deg,rgba(124,77,255,0.2),rgba(79,195,247,0.1)); border:1px solid rgba(124,77,255,0.3); color:#c4a8ff; display:inline-block; margin-bottom: 12px;">
                     <i class="fas fa-crown me-1"></i>Premium

@@ -1,21 +1,30 @@
+<?php
+$currentPage = basename($_SERVER['PHP_SELF']);
+?>
 <aside class="sidebar-pag">
     <div class="sidebar-pag-logo">🎶 SoundScore</div>
     <nav>
         <ul>
-            <li class="active">
+            <li class="<?php echo $currentPage == 'homeAdmin.php' ? 'active' : ''; ?>">
                 <a href="homeAdmin.php"><i class="fas fa-home"></i> Painel Admin</a>
             </li>
-            <li>
+            <li class="<?php echo $currentPage == 'usuario.php' ? 'active' : ''; ?>">
                 <a href="usuario.php"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a>
             </li>
-            <li>
+            <li class="<?php echo $currentPage == 'denuncias.php' ? 'active' : ''; ?>">
                 <a href="denuncias.php"><i class="fas fa-flag"></i> Denúncias</a>
             </li>
-            <li>
+            <li class="<?php echo $currentPage == 'categoria.php' ? 'active' : ''; ?>">
                 <a href="categoria.php"><i class="fas fa-folder-open"></i> Categorias</a>
             </li>
+            <li class="<?php echo $currentPage == 'album.php' ? 'active' : ''; ?>">
+                <a href="album.php"><i class="fas fa-compact-disc"></i> Cadastrar Álbum</a>
+            </li>
+            <li class="<?php echo $currentPage == 'musica.php' ? 'active' : ''; ?>">
+                <a href="musica.php"><i class="fas fa-music"></i> Cadastrar Música</a>
+            </li>
             <li>
-                <a href="paginicial.php"><i class="fas fa-music"></i> Voltar ao App</a>
+                <a href="paginicial.php"><i class="fas fa-arrow-left"></i> Voltar ao App</a>
             </li>
         </ul>
     </nav>

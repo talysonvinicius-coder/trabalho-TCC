@@ -26,7 +26,7 @@ $musicasLista = $listaDAO->listarMusicasDaLista($id_lista);
 // Fetch all musics for the add modal
 require_once 'model/dao/Conexao.php';
 $pdo = Conexao::getConexao();
-$stmt_all = $pdo->query("SELECT id, titulo, artista as artista_nome FROM musicas ORDER BY titulo ASC");
+$stmt_all = $pdo->query("SELECT m.id, m.titulo, a.nome as artista_nome FROM musicas m LEFT JOIN artista a ON m.artista_id = a.id ORDER BY m.titulo ASC");
 $todasMusicas = $stmt_all->fetchAll(PDO::FETCH_ASSOC);
 
 $isPremium = true;

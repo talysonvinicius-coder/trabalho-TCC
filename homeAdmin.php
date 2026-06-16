@@ -214,14 +214,14 @@
             </div>
             <div class="row row-cols-1 row-cols-md-3 g-3">
                 <div class="col">
-                    <div class="icon-card" onclick="window.location.href='album.html'">
+                    <div class="icon-card" onclick="window.location.href='album.php'">
                         <button class="icon-btn"><i class="fas fa-compact-disc"></i></button>
                         <h4>Criar Álbum</h4>
                         <p>Cadastre álbuns novos para compor a biblioteca.</p>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="icon-card" onclick="window.location.href='musica.html'">
+                    <div class="icon-card" onclick="window.location.href='musica.php'">
                         <button class="icon-btn"><i class="fas fa-music"></i></button>
                         <h4>Criar Música</h4>
                         <p>Adicione músicas e associe-as a álbuns e categorias.</p>
